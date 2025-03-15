@@ -16,6 +16,15 @@ export function Navbar() {
   const { user, logout } = useAuth()
   const [open, setOpen] = useState(false)
 
+  // Create a mock user for development if none exists
+  const mockUser = user || {
+    id: "dev-user-123",
+    name: "Development User",
+    email: "dev@example.com",
+    phone: "+1234567890",
+    userType: "authority",
+  }
+
   const handleLogout = () => {
     logout()
     router.push("/")
