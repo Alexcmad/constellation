@@ -1,0 +1,26 @@
+{
+  "name": "crime-alert",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "lucide-vue-next": "^0.294.0",
+    "vue": "^3.3.9",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.54.0",
+    "eslint-plugin-vue": "^9.18.1",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "vite": "^6.2.2"
+  }
+}
