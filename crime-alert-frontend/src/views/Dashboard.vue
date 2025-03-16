@@ -98,15 +98,15 @@
             <h2>Quick Actions</h2>
           </div>
           <div class="actions-grid">
-            <router-link to="/report" class="action-card">
+            <router-link to="/auth/report" class="action-card">
               <AlertTriangleIcon size="24" />
               <span>Report Emergency</span>
             </router-link>
-            <router-link to="/map" class="action-card">
+            <router-link to="/auth/map" class="action-card">
               <MapIcon size="24" />
               <span>View Map</span>
             </router-link>
-            <router-link to="/nearby" class="action-card">
+            <router-link to="/auth/nearby" class="action-card">
               <NavigationIcon size="24" />
               <span>Nearby Alerts</span>
             </router-link>

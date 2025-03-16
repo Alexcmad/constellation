@@ -8,7 +8,9 @@
           </button>
 
           <div class="logo">
-            <shield-alert-icon size="24" class="logo-icon" />
+            
+            
+            <router-link to="/auth/dashboard" class="nav-item" active-class="active"><button><shield-alert-icon size="24" class="logo-icon" /></button></router-link>
             <h1>Danger Zone</h1>
           </div>
         </div>

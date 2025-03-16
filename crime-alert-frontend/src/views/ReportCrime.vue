@@ -674,46 +674,48 @@ const calculateUrgencyScore = (text) => {
 const submitReport = async () => {
   if (!termsAgreed.value) return;
 
+  // Validate required fields
+  if (!crimeReport.value.description || crimeReport.value.description.length < 20) {
+    alert('Please provide a detailed description of the emergency (minimum 20 characters).');
+    return;
+  }
+
+  if (!crimeReport.value.crimeType) {
+    alert('Please select a valid emergency type.');
+    return;
+  }
+
+  if (!locationInfo.value.latitude || !locationInfo.value.longitude) {
+    alert('Please ensure your location is correctly set.');
+    return;
+  }
+
   isSubmitting.value = true;
 
   try {
-    const formData = new FormData();
+    // Prepare the report data according to the server's expected structure
+    const reportData = {
+      content: crimeReport.value.description, // Map description to content
+      tags: [crimeReport.value.crimeType], // Map crimeType to tags array
+      severity: crimeReport.value.severityLevel === 'low' ? 0 : 
+                crimeReport.value.severityLevel === 'medium' ? 1 : 
+                2, // Map severityLevel to a number
+      location_id: 1, // Replace with actual location ID logic (e.g., from locationInfo.value)
+    };
 
-    // Add location and time data
-    formData.append("latitude", locationInfo.value.latitude);
-    formData.append("longitude", locationInfo.value.longitude);
-    formData.append("address", locationInfo.value.address);
-    formData.append("timestamp", currentDateTime.value.toISOString());
+    console.log('Prepared report data:', reportData); // Log the payload
 
-    // Add crime details
-    formData.append("crimeType", crimeReport.value.crimeType);
-    formData.append("description", crimeReport.value.description);
-    formData.append("severityLevel", crimeReport.value.severityLevel);
-
-    // Add photos
-    photos.value.forEach((photo, index) => {
-      formData.append(`photo${index}`, photo.file);
-    });
-
-    // Add audio recording if available
-    if (audioBlob.value) {
-      formData.append("audioRecording", audioBlob.value, "recording.wav");
-    }
-
-    // Add analysis results if available
-    if (analysisResults.value) {
-      formData.append("analysisResults", JSON.stringify(analysisResults.value));
-    }
-
-    // Submit to API
-    const response = await submitCrimeReport(formData);
+    // Submit the report data
+    const response = await submitCrimeReport(reportData);
 
     // Handle success
-    submittedReportId.value = response.reportId;
+    submittedReportId.value = response.id; // Assuming the API returns the created report ID
     reportSubmitted.value = true;
+
+    console.log('Report submitted successfully:', response); // Log the success response
   } catch (error) {
-    console.error("Error submitting report:", error);
-    alert("Failed to submit report. Please try again.");
+    console.error('Error submitting report:', error); // Log the full error
+    alert(error.message); // Show the error message to the user
   } finally {
     isSubmitting.value = false;
   }
@@ -789,6 +791,7 @@ watch(() => currentStep.value, (newStep) => {
   .report-crime-container {
     max-width: 800px;
     margin: 0 auto;
+    color:black;
   }
   
   .page-header {
