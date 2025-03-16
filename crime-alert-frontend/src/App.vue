@@ -1,57 +1,74 @@
 <template>
   <div class="app-container" :class="{ 'auth-user': isAuthenticated }">
-    <transition name="fade" mode="out-in">
-      <login-page v-if="!isAuthenticated" @login-success="handleLoginSuccess" />
-      <authenticated-layout v-else :user="currentUser" @logout="handleLogout">
-        <router-view />
-      </authenticated-layout>
-    </transition>
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" :user="currentUser" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, provide } from 'vue';
-import { useRouter } from 'vue-router';
-import LoginPage from './views/LoginPage.vue';
-import AuthenticatedLayout from './layouts/AuthenticatedLayout.vue';
+import { ref, onMounted, provide, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { fetchUserProfile } from './services/authService';
 
 const isAuthenticated = ref(false);
 const currentUser = ref(null);
 const router = useRouter();
+const route = useRoute();
 
 // Provide authentication state to child components
 provide('isAuthenticated', isAuthenticated);
 provide('currentUser', currentUser);
 
-onMounted(async () => {
-  // Check if user is already logged in (token in localStorage)
-  const token = localStorage.getItem('token');
+const checkAuth = async () => {
+  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
   if (token) {
     try {
       const userData = await fetchUserProfile(token);
       currentUser.value = userData;
       isAuthenticated.value = true;
-      router.push('/dashboard');
+      
+      // Only redirect if we're on a public route
+      if (route.path === '/' || route.path === '/login' || route.path === '/register') {
+        router.push('/auth/dashboard');
+      }
     } catch (error) {
       console.error('Authentication failed:', error);
-      localStorage.removeItem('token');
+      localStorage.removeItem('access_token');
+      sessionStorage.removeItem('access_token');
+      isAuthenticated.value = false;
+      currentUser.value = null;
+      router.push('/');
+    }
+  } else {
+    isAuthenticated.value = false;
+    currentUser.value = null;
+    if (route.meta.requiresAuth) {
+      router.push('/');
     }
   }
+};
+
+// Watch for token changes
+watch(() => localStorage.getItem('access_token') || sessionStorage.getItem('access_token'), 
+  (newToken) => {
+    if (!newToken) {
+      isAuthenticated.value = false;
+      currentUser.value = null;
+      if (route.meta.requiresAuth) {
+        router.push('/');
+      }
+    } else {
+      checkAuth();
+    }
+  }
+);
+
+onMounted(() => {
+  checkAuth();
 });
-
-const handleLoginSuccess = (userData) => {
-  currentUser.value = userData;
-  isAuthenticated.value = true;
-  router.push('/dashboard');
-};
-
-const handleLogout = () => {
-  localStorage.removeItem('token');
-  isAuthenticated.value = false;
-  currentUser.value = null;
-  router.push('/');
-};
 </script>
 
 <style>

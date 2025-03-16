@@ -21,30 +21,30 @@
           
           <div class="user-menu">
             <button class="user-button" @click="isUserMenuOpen = !isUserMenuOpen">
-              <div class="avatar" :class="{ 'authority': user.role === 'AUTHORITY' }">
+              <div class="avatar" :class="{ 'authority': user?.role === 'AUTHORITY' }">
                 {{ userInitials }}
               </div>
-              <span class="user-name">{{ user.name }}</span>
+              <span class="user-name">{{ user?.name }}</span>
               <chevron-down-icon size="16" />
             </button>
             
             <div class="dropdown-menu" v-if="isUserMenuOpen" v-click-outside="closeUserMenu">
               <div class="user-info">
-                <div class="avatar" :class="{ 'authority': user.role === 'AUTHORITY' }">
+                <div class="avatar" :class="{ 'authority': user?.role === 'AUTHORITY' }">
                   {{ userInitials }}
                 </div>
                 <div>
-                  <div class="user-name">{{ user.name }}</div>
-                  <div class="user-email">{{ user.email }}</div>
-                  <div class="user-role">{{ user.role === 'AUTHORITY' ? 'Authority' : 'Citizen' }}</div>
+                  <div class="user-name">{{ user?.name }}</div>
+                  <div class="user-email">{{ user?.email }}</div>
+                  <div class="user-role">{{ user?.role === 'AUTHORITY' ? 'Authority' : 'Citizen' }}</div>
                 </div>
               </div>
               <div class="menu-items">
-                <router-link to="/profile" class="menu-item">
+                <router-link to="/auth/profile" class="menu-item">
                   <user-icon size="16" />
                   <span>Profile</span>
                 </router-link>
-                <router-link to="/settings" class="menu-item">
+                <router-link to="/auth/settings" class="menu-item">
                   <settings-icon size="16" />
                   <span>Settings</span>
                 </router-link>
@@ -62,24 +62,20 @@
         <aside class="sidebar" :class="{ open: isSidebarOpen }" v-if="isSidebarOpen" v-click-outside="closeSidebar">
 
           <nav class="sidebar-nav">
-            <router-link to="/dashboard" class="nav-item" active-class="active">
+            <router-link to="/auth/dashboard" class="nav-item" active-class="active">
               <layout-dashboard-icon size="20" />
-              <ClipboardList size="16" />
               <span>Dashboard</span>
             </router-link>
-            <router-link to="/report" class="nav-item" active-class="active">
+            <router-link to="/auth/report" class="nav-item" active-class="active">
               <alert-triangle-icon size="20" />
-              <MegaphoneIcon size="16" />
               <span>Report an Emergency</span>
             </router-link>
-            <router-link to="/map" class="nav-item" active-class="active">
+            <router-link to="/auth/map" class="nav-item" active-class="active">
               <map-icon size="20" />
-              <map-pin-icon size="16" />
               <span>View Map</span>
             </router-link>
-            <router-link to="/nearby" class="nav-item" active-class="active">
+            <router-link to="/auth/nearby" class="nav-item" active-class="active">
               <navigation-icon size="20" />
-              <BellRingIcon size="16" />
               <span>Nearby Alerts</span>
             </router-link>
           </nav>
@@ -95,7 +91,9 @@
         
         <main class="main-content">
           <transition name="fade" mode="out-in">
-            <slot></slot>
+            <router-view v-slot="{ Component }">
+              <component :is="Component" :user="user" />
+            </router-view>
           </transition>
         </main>
       </div>
@@ -103,18 +101,27 @@
   </template>
   
   <script setup>
-  import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+  import { ref, computed, onMounted, onUnmounted } from 'vue';
   import { useRouter } from 'vue-router';
+
+
   import { 
     ShieldAlertIcon, MenuIcon, XIcon, MapPinIcon, ChevronDownIcon,
     UserIcon, SettingsIcon, LogOutIcon,
     BellRingIcon,
     MegaphoneIcon,
     ClipboardList,
-    PhoneCallIcon
+    PhoneCallIcon,
+    LayoutDashboardIcon,
+    AlertTriangleIcon,
+    MapIcon,
+    NavigationIcon
   } from 'lucide-vue-next';
+
+
   import { getCurrentLocation, getLocationName } from '../services/locationService';
   
+
   const props = defineProps({
     user: {
       type: Object,
@@ -122,81 +129,68 @@
     }
   });
   
-  const emit = defineEmits(['logout']);
   const router = useRouter();
   const isSidebarOpen = ref(false);
   const isUserMenuOpen = ref(false);
   
   const currentLocation = ref(null);
-  const locationName = ref('Fetching location...');
+  const locationName = ref('');
   
   const userInitials = computed(() => {
-    if (!props.user.name) return '';
-    return props.user.name.split(' ').map(name => name[0]).join('').toUpperCase().substring(0, 2);
+    if (!props.user?.name) return '';
+    return props.user.name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase();
   });
   
-  const toggleUserMenu = () => {
-    isUserMenuOpen.value = !isUserMenuOpen.value;
+  const toggleSidebar = () => {
+    isSidebarOpen.value = !isSidebarOpen.value;
+  };
+  
+  const closeSidebar = () => {
+    isSidebarOpen.value = false;
   };
   
   const closeUserMenu = () => {
     isUserMenuOpen.value = false;
   };
-  const closeSidebar = (event) => {
-  const sidebarButton = document.querySelector(".menu-toggle"); // Select the toggle button
-  if (sidebarButton.contains(event.target)) {
-    return; // Ignore clicks on the button
-  }
-  console.log("Closing sidebar...");
-  isSidebarOpen.value = false;
-};
-  const handleClickOutside = (e) => {
-    if (!e.target.closest('.user-menu')) {
-      isUserMenuOpen.value = false;
+  
+  const handleLogout = async () => {
+    localStorage.removeItem('access_token');
+    sessionStorage.removeItem('access_token');
+    await router.push('/');
+  };
+  
+  const updateLocation = async () => {
+    try {
+      const location = await getCurrentLocation();
+      currentLocation.value = location;
+      const name = await getLocationName(location.latitude, location.longitude);
+      locationName.value = name;
+    } catch (error) {
+      console.error('Error getting location:', error);
     }
   };
   
-  const toggleSidebar = () => {
- 
-  isSidebarOpen.value = !isSidebarOpen.value;
-  
-};
-  
-onMounted(async () => {
-  try {
-    currentLocation.value = await getCurrentLocation(); // Get user's coordinates
-
-    if (currentLocation.value) {
-      locationName.value = await getLocationName(
-        currentLocation.value.latitude,
-        currentLocation.value.longitude
-      );
-    } else {
-      locationName.value = "Location unavailable"; // Handle case where location is null
-    }
-  } catch (error) {
-    console.error("Error getting location:", error);
-    locationName.value = "Location unavailable"; // Fallback in case of error
-  }
-});
-
-  
-  onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside);
+  onMounted(async () => {
+    await updateLocation();
   });
+  
   const vClickOutside = {
-  mounted(el, binding) {
-    el._clickOutside = (event) => {
-      if (!el.contains(event.target)) {
-        binding.value(event);
-      }
-    };
-    document.addEventListener("click", el._clickOutside, true); // ✅ Use capture phase
-  },
-  unmounted(el) {
-    document.removeEventListener("click", el._clickOutside, true);
-  }
-};
+    mounted(el, binding) {
+      el._clickOutside = (event) => {
+        if (!el.contains(event.target)) {
+          binding.value(event);
+        }
+      };
+      document.addEventListener("click", el._clickOutside, true);
+    },
+    unmounted(el) {
+      document.removeEventListener("click", el._clickOutside, true);
+    }
+  };
 
   </script>
   
@@ -206,12 +200,12 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    color: white;
   }
   
   .app-header {
     height: 64px;
-    background: radial-gradient(y);
-    border-bottom: 1px solid #6b5d23;
+    background: rgb(157, 55, 226);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -220,7 +214,7 @@ onMounted(async () => {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 100;
+    z-index: 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   }
   
