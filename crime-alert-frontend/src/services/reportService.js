@@ -4,7 +4,7 @@ export const submitCrimeReport = async (reportData) => {
   try {
     const response = await axios({
       method: 'POST',
-      url: '/report',
+      url: 'http://174.129.97.137/report',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
       },
@@ -22,16 +22,17 @@ export const getCrimeReports = async () => {
   try {
     const response = await axios({
       method: 'GET',
-      url: '/reports',
+      url: 'http://174.129.97.137/reports/',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
       }
     });
-    
+    console.log(response.data);
     return response.data;
+
   } catch (error) {
     console.error('Get reports error:', error);
-    throw new Error(error.response?.data?.message || 'Failed to fetch crime reports');
+    throw new Error(error.response?.data?.message);
   }
 };
 
@@ -39,13 +40,13 @@ export const getNearbyAlerts = async (latitude, longitude) => {
   try {
     const response = await axios({
       method: 'GET',
-      url: `/api/reports/nearby`,
+      url: `http://174.129.97.137/reports`,
       params: {
         lat: latitude,
         lng: longitude
       },
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
     });
     

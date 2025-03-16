@@ -1,247 +1,248 @@
 <template>
-    <div class="dashboard-container">
-      <div class="page-header">
-        <h1>Dashboard</h1>
-        <p>Welcome back, {{ user.name }}</p>
+  <div class="dashboard-container">
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <p>Welcome back, {{ user?.name}}</p>
+    </div>
+    
+    <div class="dashboard-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <AlertTriangleIcon size="24" />
+          </div>
+          <div class="stat-content">
+            <h3>Total Reports</h3>
+            <div class="stat-value">{{ stats.totalReports }}</div>
+            <div class="stat-change increase">
+              <TrendingUpIcon size="14" />
+              <span>{{ stats.reportIncrease }}% from last week</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <MapPinIcon size="24" />
+          </div>
+          <div class="stat-content">
+            <h3>Nearby Alerts</h3>
+            <div class="stat-value">{{ stats.nearbyAlerts }}</div>
+            <div class="stat-change" :class="stats.alertChange > 0 ? 'increase' : 'decrease'">
+              <TrendingUpIcon v-if="stats.alertChange > 0" size="14" />
+              <TrendingDownIcon v-else size="14" />
+              <span>{{ Math.abs(stats.alertChange) }}% from last week</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <FlameIcon size="24" />
+          </div>
+          <div class="stat-content">
+            <h3>Hotspots</h3>
+            <div class="stat-value">{{ stats.hotspots }}</div>
+            <div class="stat-change increase">
+              <TrendingUpIcon size="14" />
+              <span>{{ stats.hotspotIncrease }}% from last week</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <CheckCircleIcon size="24" />
+          </div>
+          <div class="stat-content">
+            <h3>Resolved Cases</h3>
+            <div class="stat-value">{{ stats.resolvedCases }}</div>
+            <div class="stat-change increase">
+              <TrendingUpIcon size="14" />
+              <span>{{ stats.resolvedIncrease }}% from last week</span>
+            </div>
+          </div>
+        </div>
       </div>
       
-      <div class="dashboard-content">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">
-              <alert-triangle-icon size="24" />
-            </div>
-            <div class="stat-content">
-              <h3>Total Reports</h3>
-              <div class="stat-value">{{ stats.totalReports }}</div>
-              <div class="stat-change increase">
-                <trending-up-icon size="14" />
-                <span>{{ stats.reportIncrease }}% from last week</span>
-              </div>
-            </div>
+      <div class="dashboard-row">
+        <div class="recent-reports">
+          <div class="section-header">
+            <h2>Recent Reports</h2>
+            <router-link to="auth/nearby" class="view-all">
+              View All
+              <ChevronRightIcon size="16" />
+            </router-link>
           </div>
           
-          <div class="stat-card">
-            <div class="stat-icon">
-              <map-pin-icon size="24" />
-            </div>
-            <div class="stat-content">
-              <h3>Nearby Alerts</h3>
-              <div class="stat-value">{{ stats.nearbyAlerts }}</div>
-              <div class="stat-change" :class="stats.alertChange > 0 ? 'increase' : 'decrease'">
-                <trending-up-icon v-if="stats.alertChange > 0" size="14" />
-                <trending-down-icon v-else size="14" />
-                <span>{{ Math.abs(stats.alertChange) }}% from last week</span>
+          <div class="reports-list">
+            <div v-for="report in recentReports" :key="report.id" class="report-item">
+              <div class="report-type" :class="report.severityLevel">
+                <AlertTriangleIcon size="16" />
+                <span>{{ getCrimeTypeLabel(report.crimeType) }}</span>
               </div>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon">
-              <flame-icon size="24" />
-            </div>
-            <div class="stat-content">
-              <h3>Hotspots</h3>
-              <div class="stat-value">{{ stats.hotspots }}</div>
-              <div class="stat-change increase">
-                <trending-up-icon size="14" />
-                <span>{{ stats.hotspotIncrease }}% from last week</span>
+              <div class="report-details">
+                <div class="report-location">
+                  <MapPinIcon size="14" />
+                  <span>{{ report.location?.address}}</span>
+                </div>
+                <div class="report-time">
+                  <ClockIcon size="14" />
+                  <span>{{ formatTimeAgo(report.timestamp) }}</span>
+                </div>
               </div>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon">
-              <check-circle-icon size="24" />
-            </div>
-            <div class="stat-content">
-              <h3>Resolved Cases</h3>
-              <div class="stat-value">{{ stats.resolvedCases }}</div>
-              <div class="stat-change increase">
-                <trending-up-icon size="14" />
-                <span>{{ stats.resolvedIncrease }}% from last week</span>
+              <div class="report-actions">
+                <button class="action-btn">
+                  <EyeIcon size="14" />
+                  <span>View</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
         
-        <div class="dashboard-row">
-          <div class="recent-reports">
-            <div class="section-header">
-              <h2>Recent Reports</h2>
-              <router-link to="/nearby" class="view-all">
-                View All
-                <chevron-right-icon size="16" />
-              </router-link>
-            </div>
+        <div class="quick-actions">
+          <div class="section-header">
+            <h2>Quick Actions</h2>
+          </div>
+          
+          <div class="actions-grid">
+            <router-link to="/report" class="action-card">
+              <AlertTriangleIcon size="24" />
+              <span>Report Emergency</span>
+            </router-link>
             
-            <div class="reports-list">
-              <div v-for="report in recentReports" :key="report.id" class="report-item">
-                <div class="report-type" :class="report.severityLevel">
-                  <alert-triangle-icon size="16" />
-                  <span>{{ getCrimeTypeLabel(report.crimeType) }}</span>
-                </div>
-                <div class="report-details">
-                  <div class="report-location">
-                    <map-pin-icon size="14" />
-                    <span>{{ report.location.address }}</span>
-                  </div>
-                  <div class="report-time">
-                    <clock-icon size="14" />
-                    <span>{{ formatTimeAgo(report.timestamp) }}</span>
-                  </div>
-                </div>
-                <div class="report-actions">
-                  <button class="action-btn">
-                    <eye-icon size="14" />
-                    <span>View</span>
-                  </button>
-                </div>
-              </div>
+            <router-link to="/map" class="action-card">
+              <MapIcon size="24" />
+              <span>View Map</span>
+            </router-link>
+            
+            <router-link to="/nearby" class="action-card">
+              <NavigationIcon size="24" />
+              <span>Nearby Alerts</span>
+            </router-link>
+            
+            <div class="action-card">
+              <BellIcon size="24" />
+              <span>Notifications</span>
             </div>
           </div>
           
-          <div class="quick-actions">
-            <div class="section-header">
-              <h2>Quick Actions</h2>
+          <div class="emergency-card">
+            <PhoneCallIcon size="24" />
+            <div>
+              <h3>Emergency?</h3>
+              <p>Call 119 immediately for urgent situations</p>
             </div>
-            
-            <div class="actions-grid">
-              <router-link to="/report" class="action-card">
-                <alert-triangle-icon size="24" />
-                <span>Report Emergency</span>
-              </router-link>
-              
-              <router-link to="/map" class="action-card">
-                <map-icon size="24" />
-                <span>View Map</span>
-              </router-link>
-              
-              <router-link to="/nearby" class="action-card">
-                <navigation-icon size="24" />
-                <span>Nearby Alerts</span>
-              </router-link>
-              
-              <div class="action-card">
-                <bell-icon size="24" />
-                <span>Notifications</span>
-              </div>
-            </div>
-            
-            <div class="emergency-card">
-              <phone-call-icon size="24" />
-              <div>
-                <h3>Emergency?</h3>
-                <p>Call 119 immediately for urgent situations</p>
-              </div>
-              <a href="tel:119" class="emergency-btn">Call Now</a>
-            </div>
+            <a href="tel:119" class="emergency-btn">Call Now</a>
           </div>
         </div>
       </div>
     </div>
-  </template>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { 
+  AlertTriangleIcon, MapPinIcon, FlameIcon, CheckCircleIcon,
+  TrendingUpIcon, TrendingDownIcon, ChevronRightIcon, ClockIcon,
+  EyeIcon, MapIcon, NavigationIcon, BellIcon, PhoneCallIcon
+} from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
+import { getCrimeReports } from '../services/reportService';
+import axios from 'axios';
+
+const props = defineProps({
+  user: {
+    type: Object,
+    default: () => ({})
+  }
+});
+
+const router = useRouter();
+
+// Dashboard data
+const stats = ref({
+  totalReports: 0,
+  reportIncrease: 0,
+  nearbyAlerts: 0,
+  alertChange: 0,
+  hotspots: 0,
+  hotspotIncrease: 0,
+  resolvedCases: 0,
+  resolvedIncrease: 0
+});
+
+const recentReports = ref([]);
+
+// Crime types
+const crimeTypes = [
+  { value: 'theft', label: 'Theft' },
+  { value: 'assault', label: 'Assault' },
+  { value: 'vandalism', label: 'Vandalism' },
+  { value: 'burglary', label: 'Burglary' },
+  { value: 'suspicious_activity', label: 'Suspicious Activity' },
+  { value: 'drug_related', label: 'Drug-Related Activity' },
+  { value: 'harassment', label: 'Harassment' },
+  { value: 'traffic_incident', label: 'Traffic Incident' },
+  { value: 'other', label: 'Other' }
+];
+
+// Methods
+const getCrimeTypeLabel = (value) => {
+  const crimeType = crimeTypes.find(type => type.value === value);
+  return crimeType ? crimeType.label : value;
+};
+
+const formatTimeAgo = (timestamp) => {
+  const now = new Date();
+  const alertTime = new Date(timestamp);
+  const diffMs = now - alertTime;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
   
-  <script setup>
-  import { ref, onMounted, computed } from 'vue';
-  import { 
-    AlertTriangleIcon, MapPinIcon, FlameIcon, CheckCircleIcon,
-    TrendingUpIcon, TrendingDownIcon, ChevronRightIcon, ClockIcon,
-    EyeIcon, MapIcon, NavigationIcon, BellIcon, PhoneCallIcon
-  } from 'lucide-vue-next';
-  import { useRouter } from 'vue-router';
-  import { getCrimeReports } from '../services/reportService';
-  
-  const props = defineProps({
-    user: {
-      type: Object,
-      required: true
-    }
-  });
-  
-  const router = useRouter();
-  
-  // Dashboard data
-  const stats = ref({
-    totalReports: 0,
-    reportIncrease: 0,
-    nearbyAlerts: 0,
-    alertChange: 0,
-    hotspots: 0,
-    hotspotIncrease: 0,
-    resolvedCases: 0,
-    resolvedIncrease: 0
-  });
-  
-  const recentReports = ref([]);
-  
-  // Crime types
-  const crimeTypes = [
-    { value: 'theft', label: 'Theft' },
-    { value: 'assault', label: 'Assault' },
-    { value: 'vandalism', label: 'Vandalism' },
-    { value: 'burglary', label: 'Burglary' },
-    { value: 'suspicious_activity', label: 'Suspicious Activity' },
-    { value: 'drug_related', label: 'Drug-Related Activity' },
-    { value: 'harassment', label: 'Harassment' },
-    { value: 'traffic_incident', label: 'Traffic Incident' },
-    { value: 'other', label: 'Other' }
-  ];
-  
-  // Methods
-  const getCrimeTypeLabel = (value) => {
-    const crimeType = crimeTypes.find(type => type.value === value);
-    return crimeType ? crimeType.label : value;
-  };
-  
-  const formatTimeAgo = (timestamp) => {
-    const now = new Date();
-    const alertTime = new Date(timestamp);
-    const diffMs = now - alertTime;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
+  if (diffMins < 60) {
+    return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  } else {
+    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+  }
+};
+
+const fetchDashboardData = async () => {
+  try {
+    // Fetch crime reports
+    const reports = await getCrimeReports();
     
-    if (diffMins < 60) {
-      return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-    } else {
-      return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-    }
-  };
-  
-  const fetchDashboardData = async () => {
-    try {
-      // Fetch crime reports
-      const reports = await getCrimeReports();
-      
-      // Get recent reports (last 5)
-      recentReports.value = reports
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        .slice(0, 5);
-      
-      // Calculate stats
-      stats.value = {
-        totalReports: reports.length,
-        reportIncrease: 12,
-        nearbyAlerts: 8,
-        alertChange: -5,
-        hotspots: 3,
-        hotspotIncrease: 20,
-        resolvedCases: 15,
-        resolvedIncrease: 8
-      };
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    }
-  };
-  
-  onMounted(() => {
-    fetchDashboardData();
-  });
-  </script>
-  
+    // Get recent reports (last 5)
+    recentReports.value = [...recentReports.value, ...reports]
+
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 5);
+    
+    // Calculate stats
+    stats.value = {
+      totalReports: reports.length,
+      reportIncrease: 12,
+      nearbyAlerts: 8,
+      alertChange: -5,
+      hotspots: 3,
+      hotspotIncrease: 20,
+      resolvedCases: 15,
+      resolvedIncrease: 8
+    };
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+  }
+};
+
+onMounted(() => {
+  fetchDashboardData();
+});
+</script>
   <style scoped>
   .dashboard-container {
     max-width: 1200px;

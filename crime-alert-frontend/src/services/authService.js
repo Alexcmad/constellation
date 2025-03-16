@@ -36,7 +36,15 @@ export const login = async (email, password) => {
       }
     });
     
-    return response.data; // Expected to contain token and user data
+    // Store the token in localStorage
+    if (response.data.access_token) {
+      localStorage.setItem('token', response.data.access_token);
+    } else if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    
+    console.log('Token stored:', localStorage.getItem('token'));
+    return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Login failed');
   }
@@ -53,7 +61,7 @@ export const register = async (userData) => {
 
 export const fetchUserProfile = async (token) => {
   try {
-    const response = await axios.get('/users/me', {
+    const response = await axios.get('http://174.129.97.137/users/me', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
