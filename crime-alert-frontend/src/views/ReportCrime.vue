@@ -1,8 +1,8 @@
 <template>
     <div class="report-crime-container">
       <div class="page-header">
-        <h1>Report a Crime</h1>
-        <p>Help keep your community safe by reporting suspicious activities</p>
+        <h1>Report an Emergency</h1>
+        <p>Help keep Jamaica safe by reporting emergencies!</p>
       </div>
       
       <div class="report-card">
@@ -69,13 +69,14 @@
                 </button>
               </div>
             </div>
+
             
             <!-- Step 2: Crime Details -->
             <div v-else-if="currentStep === 1" class="step-content">
               <div class="form-group">
-                <label for="crime-type">Type of Crime</label>
+                <label for="crime-type">Type of Emergency</label>
                 <select id="crime-type" v-model="crimeReport.crimeType" required>
-                  <option value="" disabled>Select crime type</option>
+                  <option value="" disabled>Select emergency type</option>
                   <option v-for="type in crimeTypes" :key="type.value" :value="type.value">
                     {{ type.label }}
                   </option>
@@ -137,7 +138,7 @@
                     :key="index" 
                     class="photo-item"
                   >
-                    <img :src="photo.url" alt="Crime scene photo" />
+                    <img :src="photo.url" alt="Emergency scene photo" />
                     <button type="button" class="remove-photo" @click="removePhoto(index)">
                       <x-icon size="16" />
                     </button>
@@ -178,7 +179,7 @@
               </div>
               
               <div class="review-section">
-                <h3>Crime Details</h3>
+                <h3>Emergency Details</h3>
                 <div class="review-item">
                   <alert-triangle-icon size="16" />
                   <span>{{ getCrimeTypeLabel(crimeReport.crimeType) }}</span>
@@ -262,7 +263,7 @@
   import { submitCrimeReport } from '../services/reportService';
   
   // Steps
-  const steps = ['Location & Time', 'Crime Details', 'Review & Submit'];
+  const steps = ['Location & Time', 'Emergency Details', 'Review & Submit'];
   const currentStep = ref(0);
   
   // Location and time data
@@ -310,8 +311,25 @@
     { value: 'drug_related', label: 'Drug-Related Activity' },
     { value: 'harassment', label: 'Harassment' },
     { value: 'traffic_incident', label: 'Traffic Incident' },
+    { value: 'road_block', label: 'Road Block' },
+    { value: 'fire', label: 'Fire' },
+    { value: 'medical_emergency', label: 'Medical Emergency' }, // Accidents, sudden illness
+    { value: 'natural_disaster', label: 'Natural Disaster' }, // Hurricane, earthquake, flood
+    { value: 'domestic_dispute', label: 'Domestic Dispute' }, // Family violence or disputes
+    { value: 'missing_person', label: 'Missing Person' }, // Report missing individuals
+    { value: 'child_endangerment', label: 'Child Endangerment' }, // Child in danger
+    { value: 'elderly_assistance', label: 'Elderly Assistance' }, // Elderly person in distress
+    { value: 'animal_cruelty', label: 'Animal Cruelty' }, // Report animal abuse
+    { value: 'electrical_hazard', label: 'Electrical Hazard' }, // Downed power lines, electrical fires
+    { value: 'gas_leak', label: 'Gas Leak' }, // Suspected gas leaks
+    { value: 'public_disturbance', label: 'Public Disturbance' }, // Riots, protests, loud noise complaints
+    { value: 'hazardous_material', label: 'Hazardous Material Spill' }, // Chemical spills, dangerous substances
+    { value: 'suicidal_person', label: 'Suicidal Person' }, // Mental health crisis
+    { value: 'drowning', label: 'Drowning' }, // Water-related emergencies
+    { value: 'lost_property', label: 'Lost Property' }, // Lost belongings
     { value: 'other', label: 'Other' }
-  ];
+];
+
   
   // Severity levels
   const severityLevels = [

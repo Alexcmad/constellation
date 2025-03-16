@@ -1,7 +1,7 @@
 <template>
     <div class="crime-map-container">
       <div class="page-header">
-        <h1>Crime Map</h1>
+        <h1>Emergency Map</h1>
         <p>View reported incidents and hotspots in your area</p>
       </div>
       

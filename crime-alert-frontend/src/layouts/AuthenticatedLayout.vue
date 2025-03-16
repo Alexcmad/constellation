@@ -66,11 +66,11 @@
             </router-link>
             <router-link to="/report" class="nav-item" active-class="active">
               <alert-triangle-icon size="20" />
-              <span>Report Crime</span>
+              <span>Report an Emergency</span>
             </router-link>
             <router-link to="/map" class="nav-item" active-class="active">
               <map-icon size="20" />
-              <span>Crime Map</span>
+              <span>View Map</span>
             </router-link>
             <router-link to="/nearby" class="nav-item" active-class="active">
               <navigation-icon size="20" />

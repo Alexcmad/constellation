@@ -2,7 +2,7 @@
     <div class="nearby-alerts-container">
       <div class="page-header">
         <h1>Nearby Alerts</h1>
-        <p>Recent crime reports in your vicinity</p>
+        <p>Recent emergency reports in your vicinity</p>
       </div>
       
       <div class="alerts-content">

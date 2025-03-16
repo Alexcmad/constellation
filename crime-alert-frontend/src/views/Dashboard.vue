@@ -109,7 +109,7 @@
             <div class="actions-grid">
               <router-link to="/report" class="action-card">
                 <alert-triangle-icon size="24" />
-                <span>Report Crime</span>
+                <span>Report Emergency</span>
               </router-link>
               
               <router-link to="/map" class="action-card">
