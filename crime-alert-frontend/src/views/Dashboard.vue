@@ -90,7 +90,7 @@
               </div>
               </div>
               <div class="report-actions">
-                <button class="action-btn">
+                <button class="action-btn" @click="navigateToMap">
                   <router-link to="/auth/map" class="view-all">
                   <EyeIcon size="14" />
                 </router-link>
@@ -121,7 +121,7 @@
       </div>
     </div>
     <div class="report-actions">
-      <button class="action-btn">
+      <button class="action-btn" @click="navigateToMap">
         <router-link to="/auth/map" class="view-all">
           <EyeIcon size="14" />
         </router-link>
@@ -201,6 +201,14 @@ const stats = ref({
   resolvedCases: 0,
   resolvedIncrease: 0,
 });
+
+
+
+
+const navigateToMap = () => {
+  router.push('/auth/map'); // ✅ Navigate to '/auth/map'
+};
+
 
 const recentReports = ref([]);
 const recentEvents = ref([]);
