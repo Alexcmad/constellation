@@ -2,9 +2,8 @@
   <div class="dashboard-container">
     <div class="page-header">
       <h1>Dashboard</h1>
-      <p>Welcome back, {{ user?.name}}</p>
+      <p>Welcome back, {{ user?.name }}</p>
     </div>
-    
     <div class="dashboard-content">
       <div class="stats-grid">
         <div class="stat-card">
@@ -20,7 +19,6 @@
             </div>
           </div>
         </div>
-        
         <div class="stat-card">
           <div class="stat-icon">
             <MapPinIcon size="24" />
@@ -35,7 +33,6 @@
             </div>
           </div>
         </div>
-        
         <div class="stat-card">
           <div class="stat-icon">
             <FlameIcon size="24" />
@@ -49,7 +46,6 @@
             </div>
           </div>
         </div>
-        
         <div class="stat-card">
           <div class="stat-icon">
             <CheckCircleIcon size="24" />
@@ -64,31 +60,28 @@
           </div>
         </div>
       </div>
-      
       <div class="dashboard-row">
         <div class="recent-reports">
           <div class="section-header">
             <h2>Recent Reports</h2>
             <router-link to="auth/nearby" class="view-all">
-              View All
-              <ChevronRightIcon size="16" />
+              View All <ChevronRightIcon size="16" />
             </router-link>
           </div>
-          
           <div class="reports-list">
             <div v-for="report in recentReports" :key="report.id" class="report-item">
-              <div class="report-type" :class="report.severityLevel">
+              <div class="report-type" :class="getSeverityClass(report.severity)">
                 <AlertTriangleIcon size="16" />
-                <span>{{ getCrimeTypeLabel(report.crimeType) }}</span>
+                <span>{{ getReportTypeFromContent(report.content) }}</span>
               </div>
               <div class="report-details">
                 <div class="report-location">
                   <MapPinIcon size="14" />
-                  <span>{{ report.location?.address}}</span>
+                  <span>{{ getLocationName(report.location_id) }}</span>
                 </div>
                 <div class="report-time">
                   <ClockIcon size="14" />
-                  <span>{{ formatTimeAgo(report.timestamp) }}</span>
+                  <span>{{ formatTimeAgo(report.timestamp || report.created_at) }}</span>
                 </div>
               </div>
               <div class="report-actions">
@@ -100,34 +93,28 @@
             </div>
           </div>
         </div>
-        
         <div class="quick-actions">
           <div class="section-header">
             <h2>Quick Actions</h2>
           </div>
-          
           <div class="actions-grid">
             <router-link to="/report" class="action-card">
               <AlertTriangleIcon size="24" />
               <span>Report Emergency</span>
             </router-link>
-            
             <router-link to="/map" class="action-card">
               <MapIcon size="24" />
               <span>View Map</span>
             </router-link>
-            
             <router-link to="/nearby" class="action-card">
               <NavigationIcon size="24" />
               <span>Nearby Alerts</span>
             </router-link>
-            
             <div class="action-card">
               <BellIcon size="24" />
               <span>Notifications</span>
             </div>
           </div>
-          
           <div class="emergency-card">
             <PhoneCallIcon size="24" />
             <div>
@@ -145,9 +132,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { 
-  AlertTriangleIcon, MapPinIcon, FlameIcon, CheckCircleIcon,
-  TrendingUpIcon, TrendingDownIcon, ChevronRightIcon, ClockIcon,
-  EyeIcon, MapIcon, NavigationIcon, BellIcon, PhoneCallIcon
+  AlertTriangleIcon, MapPinIcon, FlameIcon, CheckCircleIcon, 
+  TrendingUpIcon, TrendingDownIcon, ChevronRightIcon, ClockIcon, 
+  EyeIcon, MapIcon, NavigationIcon, BellIcon, PhoneCallIcon 
 } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
 import { getCrimeReports } from '../services/reportService';
@@ -176,33 +163,59 @@ const stats = ref({
 
 const recentReports = ref([]);
 
-// Crime types
-const crimeTypes = [
-  { value: 'theft', label: 'Theft' },
-  { value: 'assault', label: 'Assault' },
-  { value: 'vandalism', label: 'Vandalism' },
-  { value: 'burglary', label: 'Burglary' },
-  { value: 'suspicious_activity', label: 'Suspicious Activity' },
-  { value: 'drug_related', label: 'Drug-Related Activity' },
-  { value: 'harassment', label: 'Harassment' },
-  { value: 'traffic_incident', label: 'Traffic Incident' },
-  { value: 'other', label: 'Other' }
-];
+// Locations mapping (you should replace this with actual location data)
+const locations = {
+  1: 'Downtown',
+  2: 'Northside',
+  3: 'Westend',
+  4: 'Eastside',
+  5: 'Southside',
+  6: 'Central Park',
+  7: 'Industrial Zone',
+  8: 'Riverside',
+  9: 'Hillside',
+  10: 'Harbor District'
+};
 
-// Methods
-const getCrimeTypeLabel = (value) => {
-  const crimeType = crimeTypes.find(type => type.value === value);
-  return crimeType ? crimeType.label : value;
+// Helper functions
+const getLocationName = (locationId) => {
+  return locations[locationId] || `Location ${locationId}`;
+};
+
+const getSeverityClass = (severity) => {
+  switch(severity) {
+    case 3: return 'critical';
+    case 2: return 'high';
+    case 1: return 'medium';
+    case 0:
+    default: return 'low';
+  }
+};
+
+const getReportTypeFromContent = (content) => {
+  if (content.includes('Fire') || content.includes('fire') || content.includes('Smoke')) {
+    return 'Fire';
+  } else if (content.includes('flood') || content.includes('Water levels')) {
+    return 'Flood';
+  } else if (content.includes('traffic') || content.includes('vehicle') || content.includes('Road blocked')) {
+    return 'Traffic';
+  } else if (content.includes('chemical') || content.includes('Toxic')) {
+    return 'Hazardous';
+  } else {
+    return 'Alert';
+  }
 };
 
 const formatTimeAgo = (timestamp) => {
+  if (!timestamp) return 'Recently';
+  
   const now = new Date();
   const alertTime = new Date(timestamp);
   const diffMs = now - alertTime;
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
-  
+
   if (diffMins < 60) {
     return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
   } else if (diffHours < 24) {
@@ -218,9 +231,8 @@ const fetchDashboardData = async () => {
     const reports = await getCrimeReports();
     
     // Get recent reports (last 5)
-    recentReports.value = [...recentReports.value, ...reports]
-
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    recentReports.value = reports
+      .sort((a, b) => new Date(b.timestamp || b.created_at) - new Date(a.timestamp || a.created_at))
       .slice(0, 5);
     
     // Calculate stats
