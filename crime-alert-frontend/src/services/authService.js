@@ -23,63 +23,43 @@ const mockUsers = [
 ];
 
 export const login = async (email, password) => {
-  // In a real app, this would be an API call
   try {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Create form data
+    const formData = new FormData();
+    formData.append('username', email);
+    formData.append('password', password);
     
-    // Find user
-    const user = mockUsers.find(u => u.email === email);
+    // Send request with form data
+    const response = await axios.post('http://174.129.97.137/token', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     
-    if (!user || user.password !== password) {
-      throw new Error('Invalid email or password');
-    }
-    
-    // Create mock token
-    const token = `mock-jwt-token-${Date.now()}`;
-    
-    // Return user data without password
-    const { password: _, ...userData } = user;
-    
-    return {
-      token,
-      user: userData
-    };
+    return response.data; // Expected to contain token and user data
   } catch (error) {
-    throw new Error(error.message || 'Login failed');
+    throw new Error(error.response?.data?.message || 'Login failed');
   }
 };
 
 export const register = async (userData) => {
-  // In a real app, this would be an API call
   try {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Check if email already exists
-    if (mockUsers.some(u => u.email === userData.email)) {
-      throw new Error('Email already in use');
-    }
-    
-    // In a real app, we would save the user to the database
-    console.log('User registered:', userData);
-    
-    return { success: true };
+    const response = await axios.post('http://174.129.97.137/users/', userData);
+    return response.data; // Expected to contain success status
   } catch (error) {
-    throw new Error(error.message || 'Registration failed');
+    throw new Error(error.response?.data?.message || 'Registration failed');
   }
 };
 
 export const fetchUserProfile = async (token) => {
-  // In a real app, this would validate the token and return user data
   try {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // For demo, return the first mock user
-    const { password: _, ...userData } = mockUsers[0];
-    return userData;
+    const response = await axios.get('/users/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
   } catch (error) {
-    throw new Error('Failed to fetch user profile');
+    throw new Error(error.response?.data?.message || 'Failed to fetch user profile');
   }
 };
