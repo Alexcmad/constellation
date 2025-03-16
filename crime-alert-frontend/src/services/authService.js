@@ -61,7 +61,7 @@ export const register = async (userData) => {
 
 export const fetchUserProfile = async (token) => {
   try {
-    const response = await axios.get('http://174.129.97.137/users/me', {
+    const response = await axios.get('http://174.129.97.137/users/me/', {
       headers: {
         'Authorization': `Bearer ${token}`
       }

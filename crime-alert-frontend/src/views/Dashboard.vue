@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <div class="page-header">
       <h1>Dashboard</h1>
-      <p>Welcome back, {{ user?.name }}</p>
+      <p>Welcome back, {{ user?.name || 'Guest' }}</p>
     </div>
     <div class="dashboard-content">
       <div class="stats-grid">
@@ -139,6 +139,7 @@ import {
 import { useRouter } from 'vue-router';
 import { getCrimeReports } from '../services/reportService';
 import axios from 'axios';
+import {fetchUserProfile} from '../services/authService';
 
 const props = defineProps({
   user: {
@@ -148,7 +149,7 @@ const props = defineProps({
 });
 
 const router = useRouter();
-
+const user = ref(props.user);
 // Dashboard data
 const stats = ref({
   totalReports: 0,
@@ -251,8 +252,18 @@ const fetchDashboardData = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   fetchDashboardData();
+  
+  try {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const userData = await fetchUserProfile(token);
+      user.value = userData;
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+  }
 });
 </script>
   <style scoped>

@@ -9,6 +9,7 @@
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src"
   },
   "dependencies": {
+    "@capacitor/android": "^7.1.0",
     "@capacitor/cli": "^7.1.0",
     "@capacitor/core": "^7.1.0",
     "@xenova/transformers": "^2.17.2",
