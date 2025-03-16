@@ -270,28 +270,48 @@ const truncateText = (text, maxLength) => {
   if (!text) return "";
   return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
 };
-
 const fetchDashboardData = async () => {
   try {
-    const reports = await getCrimeReports();
-    const events = await getEvents(); // ✅ Make sure events are being fetched properly
+    const reports = await getCrimeReports(); // Fetch reports
+    const events = await getEvents(); // Fetch events
 
+    // Ensure recentReports and recentEvents are populated
     recentReports.value = reports
       .sort((a, b) => new Date(b.timestamp || b.created_at) - new Date(a.timestamp || a.created_at))
       .slice(0, 5);
 
-    recentEvents.value = events // ✅ Ensure recentEvents is populated correctly
+    recentEvents.value = events
       .sort((a, b) => new Date(b.timestamp || b.created_at) - new Date(a.timestamp || a.created_at))
       .slice(0, 5);
+
+    // ✅ **Update stats dynamically based on fetched data**
+    stats.value = {
+      totalReports: reports.length, // Count total reports
+      reportIncrease: calculatePercentageChange(reports.length, stats.value.totalReports), 
+      nearbyAlerts: reports.filter(report => report.location_id !== null).length, // Count reports with locations
+      alertChange: calculatePercentageChange(reports.length, stats.value.nearbyAlerts), 
+      hotspots: events.length, // Number of recent events (hotspots)
+      hotspotIncrease: calculatePercentageChange(events.length, stats.value.hotspots),
+      resolvedCases: reports.filter(report => report.status === 'resolved').length, // Count resolved cases
+      resolvedIncrease: calculatePercentageChange(
+        reports.filter(report => report.status === 'resolved').length,
+        stats.value.resolvedCases
+      ),
+    };
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
   }
 };
 
+const calculatePercentageChange = (newCount, oldCount) => {
+  if (oldCount === 0) return newCount > 0 ? 100 : 0; // If no previous data, return 100% increase if newCount > 0
+  return Math.round(((newCount - oldCount) / oldCount) * 100);
+};
+
 
 onMounted(async () => {
-  fetchDashboardData();
-  
+  await fetchDashboardData(); // Fetch stats, reports, and events
+
   try {
     const token = localStorage.getItem('token');
     if (token) {
@@ -302,6 +322,7 @@ onMounted(async () => {
     console.error('Error fetching user profile:', error);
   }
 });
+
 </script>
   <style scoped>
   .dashboard-container {
