@@ -50,6 +50,50 @@ export const submitCrimeReport = async (reportData) => {
   }
 };
 
+export const getEvent = async (index) => {
+  try {
+    // Replace {id} in the URL with the actual index parameter
+    const url = `http://174.129.97.137/events/${index}`;
+
+    const response = await axios({
+      method: 'GET',
+      url: url,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+      },
+    });
+
+    // Ensure the response contains data
+    if (!response.data) {
+      throw new Error('No data found in the response');
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error('Get Events error:', error);
+
+    // Handle cases where error.response is undefined
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch events';
+    throw new Error(errorMessage);
+  }
+};
+
+export const getEvents = async () => {
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: 'http://174.129.97.137/events/',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Get Events error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch reports');
+  }
+};
+
 export const getCrimeReports = async () => {
   try {
     const response = await axios({

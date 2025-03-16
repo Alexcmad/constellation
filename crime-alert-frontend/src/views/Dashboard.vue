@@ -85,6 +85,9 @@
                   <ClockIcon size="14" />
                   <span>{{ formatTimeAgo(report.timestamp || report.created_at) }}</span>
                 </div>
+              <div>
+               <p>{{ report.content }}</p>
+              </div>
               </div>
               <div class="report-actions">
                 <button class="action-btn">
@@ -97,6 +100,38 @@
             </div>
           </div>
         </div>
+
+        <div class="reports-list">
+  <div v-for="event in recentEvents" :key="event.id" class="report-item">
+    <div class="report-type" :class="getSeverityClass(event.severity)">
+      <AlertTriangleIcon size="16" />
+      <span>{{ getReportTypeFromContent(event.description) }}</span>
+    </div>
+    <div class="report-details">
+      <div class="report-location">
+        <MapPinIcon size="14" />
+        <span>{{ getLocationName(event.location_id) }}</span>
+      </div>
+      <div class="report-time">
+        <ClockIcon size="14" />
+        <span>{{ formatTimeAgo(event.timestamp || event.created_at) }}</span>
+      </div>
+      <div>
+        <p>{{ truncateText(event.description, 100) }}</p> <!-- ✅ Truncate to 100 characters -->
+      </div>
+    </div>
+    <div class="report-actions">
+      <button class="action-btn">
+        <router-link to="/auth/map" class="view-all">
+          <EyeIcon size="14" />
+        </router-link>
+        <span>View</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
         <div class="quick-actions">
           <div class="section-header">
             <h2>Quick Actions</h2>
@@ -142,8 +177,8 @@ import {
 } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
 import { getCrimeReports } from '../services/reportService';
-import axios from 'axios';
-import {fetchUserProfile} from '../services/authService';
+import { fetchUserProfile } from '../services/authService';
+import { getEvents } from '../services/reportService';
 
 const props = defineProps({
   user: {
@@ -154,6 +189,7 @@ const props = defineProps({
 
 const router = useRouter();
 const user = ref(props.user);
+
 // Dashboard data
 const stats = ref({
   totalReports: 0,
@@ -163,10 +199,11 @@ const stats = ref({
   hotspots: 0,
   hotspotIncrease: 0,
   resolvedCases: 0,
-  resolvedIncrease: 0
+  resolvedIncrease: 0,
 });
 
 const recentReports = ref([]);
+const recentEvents = ref([]);
 
 // Locations mapping (you should replace this with actual location data)
 const locations = {
@@ -229,32 +266,28 @@ const formatTimeAgo = (timestamp) => {
     return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
   }
 };
+const truncateText = (text, maxLength) => {
+  if (!text) return "";
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+};
 
 const fetchDashboardData = async () => {
   try {
-    // Fetch crime reports
     const reports = await getCrimeReports();
-    
-    // Get recent reports (last 5)
+    const events = await getEvents(); // ✅ Make sure events are being fetched properly
+
     recentReports.value = reports
       .sort((a, b) => new Date(b.timestamp || b.created_at) - new Date(a.timestamp || a.created_at))
       .slice(0, 5);
-    
-    // Calculate stats
-    stats.value = {
-      totalReports: reports.length,
-      reportIncrease: 12,
-      nearbyAlerts: 8,
-      alertChange: -5,
-      hotspots: 3,
-      hotspotIncrease: 20,
-      resolvedCases: 15,
-      resolvedIncrease: 8
-    };
+
+    recentEvents.value = events // ✅ Ensure recentEvents is populated correctly
+      .sort((a, b) => new Date(b.timestamp || b.created_at) - new Date(a.timestamp || a.created_at))
+      .slice(0, 5);
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
   }
 };
+
 
 onMounted(async () => {
   fetchDashboardData();
