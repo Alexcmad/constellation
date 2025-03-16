@@ -2,10 +2,11 @@
     <div class="app-layout">
       <header class="app-header">
         <div class="header-left">
-          <button class="menu-toggle" @click="isSidebarOpen = !isSidebarOpen">
-            <menu-icon v-if="!isSidebarOpen" />
-            <x-icon v-else />
+          <button class="menu-toggle" @click="toggleSidebar">
+         <menu-icon v-if="!isSidebarOpen" />
+           <x-icon v-else />
           </button>
+
           <div class="logo">
             <shield-alert-icon size="24" class="logo-icon" />
             <h1>Danger Zone</h1>
@@ -58,7 +59,8 @@
       </header>
       
       <div class="app-body">
-        <aside class="sidebar" :class="{ 'open': isSidebarOpen }">
+        <aside class="sidebar" :class="{ open: isSidebarOpen }" v-if="isSidebarOpen" v-click-outside="closeSidebar">
+
           <nav class="sidebar-nav">
             <router-link to="/dashboard" class="nav-item" active-class="active">
               <layout-dashboard-icon size="20" />
@@ -115,6 +117,7 @@
   const router = useRouter();
   const isSidebarOpen = ref(false);
   const isUserMenuOpen = ref(false);
+  
   const currentLocation = ref(null);
   const locationName = ref('Fetching location...');
   
@@ -130,12 +133,25 @@
   const closeUserMenu = () => {
     isUserMenuOpen.value = false;
   };
-  
+  const closeSidebar = (event) => {
+  const sidebarButton = document.querySelector(".menu-toggle"); // Select the toggle button
+  if (sidebarButton.contains(event.target)) {
+    return; // Ignore clicks on the button
+  }
+  console.log("Closing sidebar...");
+  isSidebarOpen.value = false;
+};
   const handleClickOutside = (e) => {
     if (!e.target.closest('.user-menu')) {
       isUserMenuOpen.value = false;
     }
   };
+  
+  const toggleSidebar = () => {
+ 
+  isSidebarOpen.value = !isSidebarOpen.value;
+  
+};
   
   onMounted(async () => {
     try {
@@ -150,13 +166,26 @@
       console.error('Error getting location:', error);
       locationName.value = 'Location unavailable';
     }
-    isSidebarOpen.value = window.innerWidth >= 768;
+    isSidebarOpen.value = window.innerWidth >= 20000;
     document.addEventListener('click', handleClickOutside);
   });
   
   onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
   });
+  const vClickOutside = {
+  mounted(el, binding) {
+    el._clickOutside = (event) => {
+      if (!el.contains(event.target)) {
+        binding.value(event);
+      }
+    };
+    document.addEventListener("click", el._clickOutside, true); // ✅ Use capture phase
+  },
+  unmounted(el) {
+    document.removeEventListener("click", el._clickOutside, true);
+  }
+};
   </script>
   
   
