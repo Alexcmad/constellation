@@ -117,6 +117,9 @@
 </template>
 
 <script>
+import { getCrimeReports } from '@/services/reportService';
+import { ref } from 'vue';
+const reports_data=ref(getCrimeReports());
 export default {
   data() {
     return {
@@ -196,144 +199,7 @@ export default {
     },
     loadEmergencyData() {
     // Mock data - in a real app, this would be fetched from an API
-    this.emergencyReports = [
-      {
-        id: '1',
-        type: 'fire',
-        location: { lat: 18.1096, lng: -77.2975 },
-        timestamp: new Date('2023-05-15T10:30:00'),
-        severity: 8,
-        description: 'Building fire on a main street',
-        reportedBy: 'user123',
-      },
-      {
-        id: '2',
-        type: 'medical',
-        location: { lat: 18.1157, lng: -77.2963 },
-        timestamp: new Date('2023-05-15T11:15:00'),
-        severity: 6,
-        description: 'Person collapsed near a market',
-        reportedBy: 'user456',
-      },
-      {
-        id: '3',
-        type: 'police',
-        location: { lat: 18.0969, lng: -77.3833 },
-        timestamp: new Date('2023-05-15T09:45:00'),
-        severity: 5,
-        description: 'Suspicious activity reported',
-        reportedBy: 'user789',
-      },
-      {
-        id: '4',
-        type: 'natural',
-        location: { lat: 18.0717, lng: -77.2878 },
-        timestamp: new Date('2023-05-15T08:30:00'),
-        severity: 7,
-        description: 'Fallen tree blocking road',
-        reportedBy: 'user101',
-      },
-      {
-        id: '5',
-        type: 'fire',
-        location: { lat: 18.1096, lng: -77.2945 },
-        timestamp: new Date('2023-05-15T12:00:00'),
-        severity: 9,
-        description: 'Large fire in industrial area',
-        reportedBy: 'user202',
-      },
-      {
-        id: '6',
-        type: 'medical',
-        location: { lat: 18.0812, lng: -77.2893 },
-        timestamp: new Date('2023-05-15T13:20:00'),
-        severity: 7,
-        description: 'Multiple people injured in accident',
-        reportedBy: 'user303',
-      },
-      {
-        id: '7',
-        type: 'police',
-        location: { lat: 18.0134, lng: -77.7884 },
-        timestamp: new Date('2023-05-15T14:10:00'),
-        severity: 4,
-        description: 'Reported theft',
-        reportedBy: 'user404',
-      },
-      {
-        id: '8',
-        type: 'other',
-        location: { lat: 18.1096, lng: -77.2987 },
-        timestamp: new Date('2023-05-15T15:30:00'),
-        severity: 3,
-        description: 'Power outage affecting several blocks',
-        reportedBy: 'user505',
-      },
-      {
-        id: '9',
-        type: 'natural',
-        location: { lat: 18.1295, lng: -77.2879 },
-        timestamp: new Date('2023-05-15T16:45:00'),
-        severity: 6,
-        description: 'Flooding reported in low-lying area',
-        reportedBy: 'user606',
-      },
-      {
-        id: '10',
-        type: 'fire',
-        location: { lat: 18.0855, lng: -77.3094 },
-        timestamp: new Date('2023-05-15T17:30:00'),
-        severity: 7,
-        description: 'Vehicle fire on highway',
-        reportedBy: 'user707',
-      },
-      {
-      id: '11',
-      type: 'fire',
-      location: { lat: 18.2320, lng: -77.4763 },
-      timestamp: new Date('2023-05-15T18:00:00'),
-      severity: 8,
-      description: 'Forest fire near Cockpit Country',
-      reportedBy: 'user808',
-    },
-    {
-      id: '12',
-      type: 'medical',
-      location: { lat: 17.8835, lng: -76.6830 },
-      timestamp: new Date('2023-05-15T18:45:00'),
-      severity: 6,
-      description: 'Child injured in rural area',
-      reportedBy: 'user909',
-    },
-    {
-      id: '13',
-      type: 'police',
-      location: { lat: 18.2092, lng: -77.3158 },
-      timestamp: new Date('2023-05-15T19:30:00'),
-      severity: 5,
-      description: 'Burglary at a remote property',
-      reportedBy: 'user1010',
-    },
-    {
-      id: '14',
-      type: 'natural',
-      location: { lat: 17.9891, lng: -77.2974 },
-      timestamp: new Date('2023-05-15T20:15:00'),
-      severity: 7,
-      description: 'Earthquake tremors felt in Kingston',
-      reportedBy: 'user1111',
-    },
-    {
-      id: '15',
-      type: 'fire',
-      location: { lat: 18.0617, lng: -77.2359 },
-      timestamp: new Date('2023-05-15T21:00:00'),
-      severity: 9,
-      description: 'Massive fire in a sugar cane field',
-      reportedBy: 'user1212',
-    },
-    ];
-  },
+    this.emergencyReports =[];  },
 
     setMapView(view) {
       this.mapView = view;
@@ -571,6 +437,7 @@ export default {
   gap: 6px;
   font-size: 14px;
   cursor: pointer;
+  color:black;
 }
 
 .color-dot {
@@ -618,6 +485,8 @@ export default {
   align-items: center;
   gap: 8px;
   font-size: 14px;
+  color:black;
+
 }
 
 .legend-dot {
