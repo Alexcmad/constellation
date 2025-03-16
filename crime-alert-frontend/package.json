@@ -9,6 +9,8 @@
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src"
   },
   "dependencies": {
+    "@capacitor/cli": "^7.1.0",
+    "@capacitor/core": "^7.1.0",
     "axios": "^1.6.2",
     "lucide-vue-next": "^0.294.0",
     "vue": "^3.3.9",
