@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --primary-color: #18d406;
+  --primary-color: #c521da;
   --secondary-color: #ffee00e1;
   --warning-color: #000000;
   --danger-color: #e02532;
@@ -21,7 +21,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background: radial-gradient(circle, #534949c4,#35d337e1,#ffee06e1, #ffee06e1);
+  background: #777070c4;
   color: var(--dark-color);
 }
 
