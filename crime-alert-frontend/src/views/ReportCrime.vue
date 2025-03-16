@@ -321,7 +321,7 @@
               </button>
               <button 
                 @click="submitReport" 
-                class="submit-btn"
+                class="submit-btn" 
                 :disabled="!termsAgreed || isSubmitting"
                 aria-label="Submit emergency report"
               >
@@ -473,7 +473,7 @@ const goToNextStep = () => {
     currentStep.value++;
   }
 };
-
+//
 const goToPreviousStep = () => {
   if (currentStep.value > 0) {
     currentStep.value--;
