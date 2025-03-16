@@ -81,7 +81,7 @@
           <div class="sidebar-footer">
             <div class="emergency-call">
               <phone-call-icon size="20" />
-              <span>Emergency: 911</span>
+              <span>Emergency: 119</span>
             </div>
           </div>
         </aside>
@@ -96,12 +96,11 @@
   </template>
   
   <script setup>
-  import { ref, computed, onMounted, watch } from 'vue';
+  import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
   import { useRouter } from 'vue-router';
   import { 
     ShieldAlertIcon, MenuIcon, XIcon, MapPinIcon, ChevronDownIcon,
-    UserIcon, SettingsIcon, LogOutIcon, LayoutDashboardIcon,
-    AlertTriangleIcon, MapIcon, NavigationIcon, PhoneCallIcon
+    UserIcon, SettingsIcon, LogOutIcon
   } from 'lucide-vue-next';
   import { getCurrentLocation, getLocationName } from '../services/locationService';
   
@@ -113,7 +112,6 @@
   });
   
   const emit = defineEmits(['logout']);
-  
   const router = useRouter();
   const isSidebarOpen = ref(false);
   const isUserMenuOpen = ref(false);
@@ -122,27 +120,26 @@
   
   const userInitials = computed(() => {
     if (!props.user.name) return '';
-    return props.user.name
-      .split(' ')
-      .map(name => name[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+    return props.user.name.split(' ').map(name => name[0]).join('').toUpperCase().substring(0, 2);
   });
   
-  // Close sidebar on mobile when route changes
-  watch(() => router.currentRoute.value, () => {
-    if (window.innerWidth < 768) {
-      isSidebarOpen.value = false;
+  const toggleUserMenu = () => {
+    isUserMenuOpen.value = !isUserMenuOpen.value;
+  };
+  
+  const closeUserMenu = () => {
+    isUserMenuOpen.value = false;
+  };
+  
+  const handleClickOutside = (e) => {
+    if (!e.target.closest('.user-menu')) {
+      isUserMenuOpen.value = false;
     }
-  });
+  };
   
   onMounted(async () => {
     try {
-      // Get user's current location
       currentLocation.value = await getCurrentLocation();
-      
-      // Get location name from coordinates
       if (currentLocation.value) {
         locationName.value = await getLocationName(
           currentLocation.value.latitude,
@@ -153,41 +150,15 @@
       console.error('Error getting location:', error);
       locationName.value = 'Location unavailable';
     }
-    
-    // Close sidebar on mobile by default
     isSidebarOpen.value = window.innerWidth >= 768;
-    
-    // Handle clicks outside user menu
-    window.addEventListener('click', (e) => {
-      if (!e.target.closest('.user-menu')) {
-        isUserMenuOpen.value = false;
-      }
-    });
+    document.addEventListener('click', handleClickOutside);
   });
   
-  const closeUserMenu = () => {
-    isUserMenuOpen.value = false;
-  };
-  
-  const handleLogout = () => {
-    emit('logout');
-  };
-  
-  // Custom directive for clicking outside
-  const vClickOutside = {
-    mounted(el, binding) {
-      el._clickOutside = (event) => {
-        if (!(el === event.target || el.contains(event.target))) {
-          binding.value(event);
-        }
-      };
-      document.addEventListener('click', el._clickOutside);
-    },
-    unmounted(el) {
-      document.removeEventListener('click', el._clickOutside);
-    }
-  };
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
   </script>
+  
   
   <style scoped>
   .app-layout {

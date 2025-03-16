@@ -132,9 +132,9 @@
               <phone-call-icon size="24" />
               <div>
                 <h3>Emergency?</h3>
-                <p>Call 911 immediately for urgent situations</p>
+                <p>Call 119 immediately for urgent situations</p>
               </div>
-              <a href="tel:911" class="emergency-btn">Call Now</a>
+              <a href="tel:119" class="emergency-btn">Call Now</a>
             </div>
           </div>
         </div>

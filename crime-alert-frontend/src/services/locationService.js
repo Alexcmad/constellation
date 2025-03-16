@@ -1,10 +1,6 @@
 // Mock location data for demonstration
-const mockLocations = {
-    'New York': { lat: 40.7128, lng: -74.0060 },
-    'Los Angeles': { lat: 34.0522, lng: -118.2437 },
-    'Chicago': { lat: 41.8781, lng: -87.6298 },
-    'Houston': { lat: 29.7604, lng: -95.3698 },
-    'Phoenix': { lat: 33.4484, lng: -112.0740 }
+const Locations = {
+    
   };
   
   export const getCurrentLocation = () => {
