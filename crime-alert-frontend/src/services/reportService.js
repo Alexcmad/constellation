@@ -1,7 +1,5 @@
 // Mock crime report data for demonstration
-const Reports = [
-    
-  ];
+const Reports = [];
   
   
   
