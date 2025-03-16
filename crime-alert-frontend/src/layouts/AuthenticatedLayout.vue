@@ -8,7 +8,7 @@
           </button>
           <div class="logo">
             <shield-alert-icon size="24" class="logo-icon" />
-            <h1>CrimeAlert</h1>
+            <h1>Danger Zone</h1>
           </div>
         </div>
         
@@ -169,8 +169,8 @@
   
   .app-header {
     height: 64px;
-    background-color: white;
-    border-bottom: 1px solid #eaeaea;
+    background: radial-gradient(y);
+    border-bottom: 1px solid #6b5d23;
     display: flex;
     align-items: center;
     justify-content: space-between;

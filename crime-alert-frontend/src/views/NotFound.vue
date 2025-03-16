@@ -33,21 +33,22 @@
   .error-code {
     font-size: 120px;
     font-weight: 700;
-    color: var(--primary-color);
+    color: rgb(142, 11, 11);
     line-height: 1;
     margin-bottom: 24px;
-    opacity: 0.5;
+    opacity: 0.7;
   }
   
   h1 {
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 16px;
-    color: #333;
+    color: #000000;
+    
   }
   
   p {
-    color: #666;
+    color: #212121;
     margin-bottom: 32px;
   }
   
@@ -56,7 +57,7 @@
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background-color: var(--primary-color);
+    background-color: rgb(138, 11, 184);
     color: white;
     border-radius: 6px;
     text-decoration: none;

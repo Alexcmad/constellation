@@ -80,6 +80,7 @@
         <div class="view-controls">
           <button 
             class="view-btn" 
+            style="background-color: #8A0BB8;"
             :class="{ 'active': mapView === 'all' }"
             @click="mapView = 'all'"
           >

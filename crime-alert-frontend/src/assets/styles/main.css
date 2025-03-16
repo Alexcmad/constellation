@@ -6,9 +6,9 @@
   --primary-color: #18d406;
   --secondary-color: #ffee00e1;
   --warning-color: #000000;
-  --danger-color: #a86b4f;
+  --danger-color: #e02532;
   --alert-color: #ff0000;
-  --dark-color: #1a1a2e;
+  --dark-color: #1a1ae5;
   --light-color: #f8f9fa;
   --success-color: #06d6a0;
 }
@@ -21,7 +21,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f0f2f5;
+  background: radial-gradient(circle, #534949c4,#35d337e1,#ffee06e1, #ffee06e1);
   color: var(--dark-color);
 }
 

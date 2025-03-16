@@ -305,29 +305,15 @@
   const crimeTypes = [
     { value: 'theft', label: 'Theft' },
     { value: 'assault', label: 'Assault' },
-    { value: 'vandalism', label: 'Vandalism' },
-    { value: 'burglary', label: 'Burglary' },
     { value: 'suspicious_activity', label: 'Suspicious Activity' },
-    { value: 'drug_related', label: 'Drug-Related Activity' },
-    { value: 'harassment', label: 'Harassment' },
     { value: 'traffic_incident', label: 'Traffic Incident' },
-    { value: 'road_block', label: 'Road Block' },
-    { value: 'fire', label: 'Fire' },
+     { value: 'fire', label: 'Fire' },
     { value: 'medical_emergency', label: 'Medical Emergency' }, // Accidents, sudden illness
-    { value: 'natural_disaster', label: 'Natural Disaster' }, // Hurricane, earthquake, flood
-    { value: 'domestic_dispute', label: 'Domestic Dispute' }, // Family violence or disputes
     { value: 'missing_person', label: 'Missing Person' }, // Report missing individuals
     { value: 'child_endangerment', label: 'Child Endangerment' }, // Child in danger
     { value: 'elderly_assistance', label: 'Elderly Assistance' }, // Elderly person in distress
-    { value: 'animal_cruelty', label: 'Animal Cruelty' }, // Report animal abuse
-    { value: 'electrical_hazard', label: 'Electrical Hazard' }, // Downed power lines, electrical fires
-    { value: 'gas_leak', label: 'Gas Leak' }, // Suspected gas leaks
-    { value: 'public_disturbance', label: 'Public Disturbance' }, // Riots, protests, loud noise complaints
-    { value: 'hazardous_material', label: 'Hazardous Material Spill' }, // Chemical spills, dangerous substances
-    { value: 'suicidal_person', label: 'Suicidal Person' }, // Mental health crisis
-    { value: 'drowning', label: 'Drowning' }, // Water-related emergencies
-    { value: 'lost_property', label: 'Lost Property' }, // Lost belongings
-    { value: 'other', label: 'Other' }
+   { value: 'public_disturbance', label: 'Public Disturbance' }, // Riots, protests, loud noise complaints
+     { value: 'other', label: 'Other' }
 ];
 
   
@@ -568,6 +554,7 @@
   .step.active:not(:last-child)::after,
   .step.completed:not(:last-child)::after {
     background-color: var(--primary-color);
+    
   }
   
   .step-number {
@@ -599,6 +586,7 @@
     font-size: 14px;
     font-weight: 500;
     color: #666;
+    padding-bottom: 10%;
   }
   
   .step.active .step-label {
