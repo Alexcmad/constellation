@@ -64,18 +64,22 @@
           <nav class="sidebar-nav">
             <router-link to="/dashboard" class="nav-item" active-class="active">
               <layout-dashboard-icon size="20" />
+              <ClipboardList size="16" />
               <span>Dashboard</span>
             </router-link>
             <router-link to="/report" class="nav-item" active-class="active">
               <alert-triangle-icon size="20" />
+              <MegaphoneIcon size="16" />
               <span>Report an Emergency</span>
             </router-link>
             <router-link to="/map" class="nav-item" active-class="active">
               <map-icon size="20" />
+              <map-pin-icon size="16" />
               <span>View Map</span>
             </router-link>
             <router-link to="/nearby" class="nav-item" active-class="active">
               <navigation-icon size="20" />
+              <BellRingIcon size="16" />
               <span>Nearby Alerts</span>
             </router-link>
           </nav>
@@ -83,6 +87,7 @@
           <div class="sidebar-footer">
             <div class="emergency-call">
               <phone-call-icon size="20" />
+              
               <span>Emergency: 119</span>
             </div>
           </div>
@@ -102,7 +107,11 @@
   import { useRouter } from 'vue-router';
   import { 
     ShieldAlertIcon, MenuIcon, XIcon, MapPinIcon, ChevronDownIcon,
-    UserIcon, SettingsIcon, LogOutIcon
+    UserIcon, SettingsIcon, LogOutIcon,
+    BellRingIcon,
+    MegaphoneIcon,
+    ClipboardList,
+    PhoneCallIcon
   } from 'lucide-vue-next';
   import { getCurrentLocation, getLocationName } from '../services/locationService';
   
@@ -153,22 +162,24 @@
   
 };
   
-  onMounted(async () => {
-    try {
-      currentLocation.value = await getCurrentLocation();
-      if (currentLocation.value) {
-        locationName.value = await getLocationName(
-          currentLocation.value.latitude,
-          currentLocation.value.longitude
-        );
-      }
-    } catch (error) {
-      console.error('Error getting location:', error);
-      locationName.value = 'Location unavailable';
+onMounted(async () => {
+  try {
+    currentLocation.value = await getCurrentLocation(); // Get user's coordinates
+
+    if (currentLocation.value) {
+      locationName.value = await getLocationName(
+        currentLocation.value.latitude,
+        currentLocation.value.longitude
+      );
+    } else {
+      locationName.value = "Location unavailable"; // Handle case where location is null
     }
-    isSidebarOpen.value = window.innerWidth >= 20000;
-    document.addEventListener('click', handleClickOutside);
-  });
+  } catch (error) {
+    console.error("Error getting location:", error);
+    locationName.value = "Location unavailable"; // Fallback in case of error
+  }
+});
+
   
   onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
@@ -186,6 +197,7 @@
     document.removeEventListener("click", el._clickOutside, true);
   }
 };
+
   </script>
   
   

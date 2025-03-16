@@ -36,34 +36,24 @@ const Locations = {
   
   export const getLocationName = async (latitude, longitude) => {
     try {
-      // In a real app, this would use the Google Maps Geocoding API
-      // For demo purposes, we'll return a mock location name
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Find the closest mock location
-      let closestLocation = '';
-      let minDistance = Infinity;
-      
-      for (const [name, coords] of Object.entries(mockLocations)) {
-        const distance = calculateDistance(
-          latitude, longitude, 
-          coords.lat, coords.lng
-        );
-        
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestLocation = name;
-        }
+      const apiKey = "AIzaSyD8aepW-FrtXxQB64FKXS2JKp9QabST0dY"; // Replace with your actual API key
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+      );
+      const data = await response.json();
+  
+      if (data.status === "OK" && data.results.length > 0) {
+        return data.results[0].formatted_address; // ✅ Returns the real location name
+      } else {
+        console.error("Geocoding API error:", data.status);
+        return "Unknown Location";
       }
-      
-      return `${closestLocation}, NY`;
     } catch (error) {
-      console.error('Error getting location name:', error);
-      return 'Unknown Location';
+      console.error("Error fetching location:", error);
+      return "Unknown Location";
     }
   };
+  
   
   // Calculate distance between two coordinates in km
   function calculateDistance(lat1, lon1, lat2, lon2) {
