@@ -119,6 +119,8 @@
 <script>
 import { getCrimeReports } from '@/services/reportService';
 import { ref } from 'vue';
+
+
 const reports_data=ref(getCrimeReports());
 export default {
   data() {
