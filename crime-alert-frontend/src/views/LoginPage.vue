@@ -1,251 +1,263 @@
 <template>
-    <div class="login-container">
-      <div class="login-card">
-        <div class="login-header">
-          <div class="logo">
-            <shield-alert-icon size="32" class="logo-icon" />
-            <h1>Danger Zone</h1>
-          </div>
-          <p>Community Safety Reporting System</p>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo">
+          <shield-alert-icon size="32" class="logo-icon" />
+          <h1>CrimeAlert</h1>
         </div>
-        
-        <div class="tabs">
-          <button 
-            :class="{ active: activeTab === 'login' }" 
-            @click="activeTab = 'login'"
-          >
-            Login
-          </button>
-          <button 
-            :class="{ active: activeTab === 'register' }" 
-            @click="activeTab = 'register'"
-          >
-            Register
-          </button>
-        </div>
-        
-        <transition name="fade" mode="out-in">
-          <form v-if="activeTab === 'login'" @submit.prevent="handleLogin" class="login-form">
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input 
-                type="email" 
-                id="email" 
-                v-model="loginForm.email" 
-                required 
-                placeholder="Enter your email"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label for="password">Password</label>
-              <div class="password-input">
-                <input 
-                  :type="showPassword ? 'text' : 'password'" 
-                  id="password" 
-                  v-model="loginForm.password" 
-                  required 
-                  placeholder="Enter your password"
-                />
-                <button 
-                  type="button" 
-                  class="toggle-password" 
-                  @click="showPassword = !showPassword"
-                >
-                  <eye-icon v-if="!showPassword" size="18" />
-                  <eye-off-icon v-else size="18" />
-                </button>
-              </div>
-            </div>
-            
-            <div class="form-group remember-me">
-              <label class="checkbox">
-                <input type="checkbox" v-model="loginForm.remember" />
-                <span>Remember me</span>
-              </label>
-              <a href="#" class="forgot-password">Forgot password?</a>
-            </div>
-            
-            <button 
-              type="submit" 
-              class="submit-btn" 
-              :disabled="isLoading"
-            >
-              <loader-icon v-if="isLoading" class="spin" size="18" />
-              <span v-else>Login</span>
-            </button>
-            
-            <div v-if="error" class="error-message">
-              {{ error }}
-            </div>
-          </form>
-          
-          <form v-else @submit.prevent="handleRegister" class="register-form">
-            <div class="form-group">
-              <label for="reg-name">Full Name</label>
-              <input 
-                type="text" 
-                id="reg-name" 
-                v-model="registerForm.name" 
-                required 
-                placeholder="Enter your full name"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label for="reg-email">Email</label>
-              <input 
-                type="email" 
-                id="reg-email" 
-                v-model="registerForm.email" 
-                required 
-                placeholder="Enter your email"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label for="reg-phone">Phone Number</label>
-              <input 
-                type="tel" 
-                id="reg-phone" 
-                v-model="registerForm.phone" 
-                required 
-                placeholder="Enter your phone number"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label for="reg-password">Password</label>
-              <div class="password-input">
-                <input 
-                  :type="showPassword ? 'text' : 'password'" 
-                  id="reg-password" 
-                  v-model="registerForm.password" 
-                  required 
-                  placeholder="Create a password"
-                />
-                <button 
-                  type="button" 
-                  class="toggle-password" 
-                  @click="showPassword = !showPassword"
-                >
-                  <eye-icon v-if="!showPassword" size="18" />
-                  <eye-off-icon v-else size="18" />
-                </button>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="user-type">Register as</label>
-              <select id="user-type" v-model="registerForm.userType" required>
-                <option value="CITIZEN">Citizen</option>
-                <option value="AUTHORITY">Authority (Requires Verification)</option>
-              </select>
-            </div>
-            
-            <div class="form-group terms">
-              <label class="checkbox">
-                <input type="checkbox" v-model="registerForm.agreeTerms" required />
-                <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
-              </label>
-            </div>
-            
-            <button 
-              type="submit" 
-              class="submit-btn" 
-              :disabled="isLoading || !registerForm.agreeTerms"
-            >
-              <loader-icon v-if="isLoading" class="spin" size="18" />
-              <span v-else>Register</span>
-            </button>
-            
-            <div v-if="error" class="error-message">
-              {{ error }}
-            </div>
-          </form>
-        </transition>
+        <p>Community Safety Reporting System</p>
       </div>
+      
+      <div class="tabs">
+        <button 
+          :class="{ active: activeTab === 'login' }" 
+          @click="activeTab = 'login'"
+        >
+          Login
+        </button>
+        <button 
+          :class="{ active: activeTab === 'register' }" 
+          @click="activeTab = 'register'"
+        >
+          Register
+        </button>
+      </div>
+      
+      <transition name="fade" mode="out-in">
+        <form v-if="activeTab === 'login'" @submit.prevent="handleLogin" class="login-form">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              v-model="loginForm.email" 
+              required 
+              placeholder="Enter your email"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-input">
+              <input 
+                :type="showPassword ? 'text' : 'password'" 
+                id="password" 
+                v-model="loginForm.password" 
+                required 
+                placeholder="Enter your password"
+              />
+              <button 
+                type="button" 
+                class="toggle-password" 
+                @click="showPassword = !showPassword"
+              >
+                <eye-icon v-if="!showPassword" size="18" />
+                <eye-off-icon v-else size="18" />
+              </button>
+            </div>
+          </div>
+          
+          <div class="form-group remember-me">
+            <label class="checkbox">
+              <input type="checkbox" v-model="loginForm.remember" />
+              <span>Remember me</span>
+            </label>
+            <a href="#" class="forgot-password">Forgot password?</a>
+          </div>
+          
+          <button 
+            type="submit" 
+            class="submit-btn" 
+            :disabled="isLoading"
+          >
+            <loader-icon v-if="isLoading" class="spin" size="18" />
+            <span v-else>Login</span>
+          </button>
+          
+          <div v-if="error" class="error-message">
+            {{ error }}
+          </div>
+        </form>
+        
+        <form v-else @submit.prevent="handleRegister" class="register-form">
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input 
+              type="text" 
+              id="reg-name" 
+              v-model="registerForm.name" 
+              required 
+              placeholder="Enter your full name"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="reg-email">Email</label>
+            <input 
+              type="email" 
+              id="reg-email" 
+              v-model="registerForm.email" 
+              required 
+              placeholder="Enter your email"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="reg-phone">Phone Number</label>
+            <input 
+              type="tel" 
+              id="reg-phone" 
+              v-model="registerForm.phone" 
+              required 
+              placeholder="Enter your phone number"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <div class="password-input">
+              <input 
+                :type="showPassword ? 'text' : 'password'" 
+                id="reg-password" 
+                v-model="registerForm.password" 
+                required 
+                placeholder="Create a password"
+              />
+              <button 
+                type="button" 
+                class="toggle-password" 
+                @click="showPassword = !showPassword"
+              >
+                <eye-icon v-if="!showPassword" size="18" />
+                <eye-off-icon v-else size="18" />
+              </button>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="user-type">Register as</label>
+            <select id="user-type" v-model="registerForm.userType" required>
+              <option value="CITIZEN">Citizen</option>
+              <option value="AUTHORITY">Authority (Requires Verification)</option>
+            </select>
+          </div>
+          
+          <div class="form-group terms">
+            <label class="checkbox">
+              <input type="checkbox" v-model="registerForm.agreeTerms" required />
+              <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+            </label>
+          </div>
+          
+          <button 
+            type="submit" 
+            class="submit-btn" 
+            :disabled="isLoading || !registerForm.agreeTerms"
+          >
+            <loader-icon v-if="isLoading" class="spin" size="18" />
+            <span v-else>Register</span>
+          </button>
+          
+          <div v-if="error" class="error-message">
+            {{ error }}
+          </div>
+        </form>
+      </transition>
     </div>
-  </template>
+  </div>
+</template>
   
-  <script setup>
-  import { ref } from 'vue';
-  import { ShieldAlertIcon, EyeIcon, EyeOffIcon, LoaderIcon } from 'lucide-vue-next';
-  import { login, register } from '../services/authService';
-  
-  const emit = defineEmits(['login-success']);
-  
-  const activeTab = ref('login');
-  const showPassword = ref(false);
-  const isLoading = ref(false);
-  const error = ref('');
-  
-  const loginForm = ref({
-    email: '',
-    password: '',
-    remember: false
-  });
-  
-  const registerForm = ref({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    userType: 'CITIZEN',
-    agreeTerms: false
-  });
-  
-  const handleLogin = async () => {
-    try {
-      isLoading.value = true;
-      error.value = '';
-      
-      const response = await login(loginForm.value.email, loginForm.value.password);
-      
-      // Store token in localStorage
-      localStorage.setItem('token', response.token);
-      
-      // Emit login success event with user data
-      emit('login-success', response.user);
-    } catch (err) {
-      error.value = err.message || 'Login failed. Please try again.';
-    } finally {
-      isLoading.value = false;
-    }
-  };
-  
-  const handleRegister = async () => {
-    try {
-      isLoading.value = true;
-      error.value = '';
-      
-      const response = await register(registerForm.value);
-      
-      // After successful registration, switch to login tab
-      activeTab.value = 'login';
-      
-      // Pre-fill email for convenience
-      loginForm.value.email = registerForm.value.email;
-      
-      // Reset register form
-      registerForm.value = {
-        name: '',
-        email: '',
-        phone: '',
-        password: '',
-        userType: 'CITIZEN',
-        agreeTerms: false
-      };
-      
-      // Show success message
-      error.value = 'Registration successful! Please login.';
-    } catch (err) {
-      error.value = err.message || 'Registration failed. Please try again.';
-    } finally {
-      isLoading.value = false;
-    }
-  };
-  </script>
+<script setup>
+import { ref, reactive } from 'vue';
+import { ShieldAlertIcon, EyeIcon, EyeOffIcon, LoaderIcon } from 'lucide-vue-next';
+import { login, register } from '../services/authService';
+import { useRouter } from 'vue-router';
+
+// Router
+const router = useRouter();
+
+// Tabs
+const activeTab = ref('login');
+
+// Password visibility
+const showPassword = ref(false);
+
+// Loading state
+const isLoading = ref(false);
+
+// Error message
+const error = ref('');
+
+// Login form
+const loginForm = reactive({
+  email: '',
+  password: '',
+  remember: false
+});
+
+// Register form
+const registerForm = reactive({
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+  userType: 'CITIZEN',
+  agreeTerms: false
+});
+
+// Handle login
+const handleLogin = async () => {
+  try {
+    isLoading.value = true;
+    error.value = '';
+
+    const response = await login(loginForm.email, loginForm.password);
+
+    // Store token in localStorage
+    localStorage.setItem('access_token', response.access_token);
+    console.log(response);
+
+    // Redirect to dashboard
+    router.push('/dashboard');
+  } catch (err) {
+    error.value = err.message || 'Login failed. Please try again.';
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Handle registration
+const handleRegister = async () => {
+  try {
+    isLoading.value = true;
+    error.value = '';
+
+    const response = await register(registerForm);
+
+    // After successful registration, switch to login tab
+    activeTab.value = 'login';
+
+    // Pre-fill email for convenience
+    loginForm.email = registerForm.email;
+
+    // Reset register form
+    registerForm.name = '';
+    registerForm.email = '';
+    registerForm.phone = '';
+    registerForm.password = '';
+    registerForm.userType = 'CITIZEN';
+    registerForm.agreeTerms = false;
+
+    // Show success message
+    error.value = 'Registration successful! Please login.';
+  } catch (err) {
+    error.value = err.message || 'Registration failed. Please try again.';
+  } finally {
+    isLoading.value = false;
+  }
+};
+</script>
   
   <style scoped>
   .login-container {

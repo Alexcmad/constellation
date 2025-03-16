@@ -1,60 +1,60 @@
-// Mock crime report data for demonstration
-const Reports = [];
-  
-  
-  
-  export const submitCrimeReport = async (reportData) => {
-    try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // In a real app, this would send the data to the server
-      console.log('Submitting report:', reportData);
-      
-      // Generate a random report ID
-      const reportId = `REP-${Date.now().toString().slice(-6)}`;
-      
-      return { success: true, reportId };
-    } catch (error) {
-      throw new Error('Failed to submit report');
-    }
-  };
-  
-  export const getCrimeReports = async () => {
-    try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      
-      return mockReports;
-    } catch (error) {
-      throw new Error('Failed to fetch crime reports');
-    }
-  };
-  
-  export const getNearbyAlerts = async (latitude, longitude) => {
-    try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Calculate distance for each report
-      const reportsWithDistance = mockReports.map(report => {
-        const distance = calculateDistance(
-          latitude, longitude,
-          report.location.latitude, report.location.longitude
-        );
-        
-        return {
-          ...report,
-          distance
-        };
-      });
-      
-      // Sort by distance
-      return reportsWithDistance.sort((a, b) => a.distance - b.distance);
-    } catch (error) {
-      throw new Error('Failed to fetch nearby alerts');
-    }
-  };
+import axios from 'axios';
+
+export const submitCrimeReport = async (reportData) => {
+  try {
+    const response = await axios({
+      method: 'POST',
+      url: '/report',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
+      data: reportData
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Submit report error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to submit report');
+  }
+};
+
+export const getCrimeReports = async () => {
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: '/reports',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Get reports error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch crime reports');
+  }
+};
+
+export const getNearbyAlerts = async (latitude, longitude) => {
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `/api/reports/nearby`,
+      params: {
+        lat: latitude,
+        lng: longitude
+      },
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Get nearby alerts error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch nearby alerts');
+  }
+};
   
   // Calculate distance between two coordinates in km
   function calculateDistance(lat1, lon1, lat2, lon2) {
