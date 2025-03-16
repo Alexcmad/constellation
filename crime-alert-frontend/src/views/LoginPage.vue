@@ -219,7 +219,7 @@ const handleLogin = async () => {
     console.log(response);
 
     // Redirect to dashboard
-    router.push('/dashboard');
+    router.push('/auth/dashboard');
   } catch (err) {
     error.value = err.message || 'Login failed. Please try again.';
   } finally {

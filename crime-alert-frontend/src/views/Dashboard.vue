@@ -143,17 +143,23 @@
   </template>
   
   <script setup>
-  import { ref, onMounted, inject, computed } from 'vue';
+  import { ref, onMounted, computed } from 'vue';
   import { 
     AlertTriangleIcon, MapPinIcon, FlameIcon, CheckCircleIcon,
     TrendingUpIcon, TrendingDownIcon, ChevronRightIcon, ClockIcon,
     EyeIcon, MapIcon, NavigationIcon, BellIcon, PhoneCallIcon
   } from 'lucide-vue-next';
+  import { useRouter } from 'vue-router';
   import { getCrimeReports } from '../services/reportService';
   
-  // Get current user from parent component
-  const currentUser = inject('currentUser');
-  const user = computed(() => currentUser.value);
+  const props = defineProps({
+    user: {
+      type: Object,
+      required: true
+    }
+  });
+  
+  const router = useRouter();
   
   // Dashboard data
   const stats = ref({

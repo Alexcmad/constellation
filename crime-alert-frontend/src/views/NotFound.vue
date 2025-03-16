@@ -4,7 +4,7 @@
         <div class="error-code">404</div>
         <h1>Page Not Found</h1>
         <p>The page you are looking for doesn't exist or has been moved.</p>
-        <router-link to="/dashboard" class="back-btn">
+        <router-link to="/auth/dashboard" class="back-btn">
           <home-icon size="16" />
           Back to Dashboard
         </router-link>
@@ -43,7 +43,7 @@
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 16px;
-    color: #000000;
+    color: #ff1515;
     
   }
   
