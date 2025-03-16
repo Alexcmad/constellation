@@ -15,10 +15,10 @@ const Locations = {
           },
           (error) => {
             console.error('Error getting location:', error);
-            // Fallback to a default location (New York)
+            // Fallback to a default location 
             resolve({
-              latitude: 40.7128,
-              longitude: -74.0060
+              latitude: 18.000,
+              longitude: 77.0040
             });
           },
           { timeout: 10000, enableHighAccuracy: true }
