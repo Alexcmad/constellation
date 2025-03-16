@@ -1,775 +1,668 @@
 <template>
-    <div class="crime-map-container">
-      <div class="page-header">
-        <h1>Emergency Map</h1>
-        <p>View reported incidents and hotspots in your area</p>
-      </div>
-      
-      <div class="map-controls">
-        <div class="filter-controls">
-          <button 
-            class="filter-toggle" 
-            @click="showFilters = !showFilters"
-          >
-            <filter-icon size="16" />
-            Filters
-            <chevron-down-icon 
-              size="16" 
-              :class="{ 'rotate': showFilters }"
-            />
-          </button>
-          
-          <transition name="slide-down">
-            <div v-if="showFilters" class="filters-panel">
-              <div class="filter-group">
-                <label>Crime Types</label>
-                <div class="checkbox-group">
-                  <label v-for="type in crimeTypes" :key="type.value" class="checkbox">
-                    <input 
-                      type="checkbox" 
-                      :value="type.value" 
-                      v-model="filters.crimeTypes"
-                    />
-                    <span>{{ type.label }}</span>
-                  </label>
-                </div>
-              </div>
-              
-              <div class="filter-group">
-                <label>Time Period</label>
-                <div class="radio-group">
-                  <label v-for="period in timePeriods" :key="period.value" class="radio">
-                    <input 
-                      type="radio" 
-                      :value="period.value" 
-                      v-model="filters.timePeriod"
-                    />
-                    <span>{{ period.label }}</span>
-                  </label>
-                </div>
-              </div>
-              
-              <div class="filter-group">
-                <label>Severity</label>
-                <div class="checkbox-group">
-                  <label v-for="level in severityLevels" :key="level.value" class="checkbox">
-                    <input 
-                      type="checkbox" 
-                      :value="level.value" 
-                      v-model="filters.severityLevels"
-                    />
-                    <span>{{ level.label }}</span>
-                  </label>
-                </div>
-              </div>
-              
-              <div class="filter-actions">
-                <button @click="resetFilters" class="reset-btn">
-                  <refresh-cw-icon size="14" />
-                  Reset
-                </button>
-                <button @click="applyFilters" class="apply-btn">
-                  <check-icon size="14" />
-                  Apply
-                </button>
-              </div>
-            </div>
-          </transition>
-        </div>
-        
-        <div class="view-controls">
-          <button 
-            class="view-btn" 
-            style="background-color: #8A0BB8;"
-            :class="{ 'active': mapView === 'all' }"
-            @click="mapView = 'all'"
-          >
-            <map-icon size="16" />
-            All Reports
-          </button>
-          <button 
-            class="view-btn" 
-            :class="{ 'active': mapView === 'hotspots' }"
-            @click="mapView = 'hotspots'"
-          >
-            <flame-icon size="16" />
-            Hotspots
-          </button>
-        </div>
-      </div>
-      
+  <div class="map-wrapper">
+    <div class="map-card">
       <div class="map-container">
-        <div class="map-legend">
-          <h4>Legend</h4>
-          <div class="legend-item">
-            <span class="legend-color" style="background-color: #ffeb3b;"></span>
-            <span>1-5 reports</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background-color: #ff9800;"></span>
-            <span>5-10 reports</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background-color: #f44336;"></span>
-            <span>10+ reports</span>
-          </div>
-        </div>
-        
         <div ref="mapElement" class="map-element"></div>
-        
+
+        <!-- Loading Spinner -->
         <div v-if="isLoading" class="map-loading">
-          <loader-icon class="spin" size="32" />
-          <span>Loading map data...</span>
-        </div>
-      </div>
-      
-      <div class="report-details" v-if="selectedReport">
-        <div class="report-header">
-          <h3>Report Details</h3>
-          <button @click="selectedReport = null" class="close-btn">
-            <x-icon size="16" />
-          </button>
-        </div>
-        
-        <div class="report-content">
-          <div class="report-info">
-            <div class="info-item">
-              <alert-triangle-icon size="16" />
-              <span>{{ getCrimeTypeLabel(selectedReport.crimeType) }}</span>
-            </div>
-            <div class="info-item">
-              <map-pin-icon size="16" />
-              <span>{{ selectedReport.location.address }}</span>
-            </div>
-            <div class="info-item">
-              <clock-icon size="16" />
-              <span>{{ formatDate(selectedReport.timestamp) }}</span>
-            </div>
-            <div class="info-item">
-              <thermometer-icon size="16" />
-              <span>Severity: {{ getSeverityLabel(selectedReport.severityLevel) }}</span>
-            </div>
+          <div class="loading-content">
+            <span class="loading-spinner"></span>
+            <span>Loading map...</span>
           </div>
-          
-          <div class="report-description">
-            <h4>Description</h4>
-            <p>{{ selectedReport.description }}</p>
-          </div>
-          
-          <div v-if="selectedReport.photos && selectedReport.photos.length > 0" class="report-photos">
-            <h4>Photos</h4>
-            <div class="photos-grid">
-              <div 
-                v-for="(photo, index) in selectedReport.photos" 
-                :key="index" 
-                class="photo-item"
-                @click="openPhotoViewer(index)"
-              >
-                <img :src="photo" alt="Crime scene photo" />
+        </div>
+
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="error-message">
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <!-- Map Controls -->
+        <div v-if="!isLoading && !errorMessage" class="map-controls">
+          <div class="control-card">
+            <div class="control-header">
+              <h3>Emergency Alerts</h3>
+              <div class="view-toggle">
+                <button 
+                  @click="setMapView('dots')" 
+                  :class="{ active: mapView === 'dots' }"
+                >
+                  Dots
+                </button>
+                <button 
+                  @click="setMapView('heatmap')" 
+                  :class="{ active: mapView === 'heatmap' }"
+                >
+                  Heat Map
+                </button>
+              </div>
+            </div>
+            
+            <div class="filter-section">
+              <h4>Emergency Types</h4>
+              <div class="filter-options">
+                <div 
+                  v-for="type in emergencyTypes" 
+                  :key="type.value" 
+                  class="filter-option"
+                >
+                  <input 
+                    type="checkbox" 
+                    :id="type.value" 
+                    :value="type.value" 
+                    v-model="activeFilters"
+                  />
+                  <label :for="type.value">
+                    <span 
+                      class="color-dot" 
+                      :style="{ backgroundColor: type.color }"
+                    ></span>
+                    {{ type.label }}
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="filter-section">
+              <div class="severity-header">
+                <h4>Min Severity</h4>
+                <span>{{ minSeverity }}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="10" 
+                step="1" 
+                v-model.number="minSeverity" 
+                class="severity-slider"
+              />
+              <div class="slider-labels">
+                <span>Low</span>
+                <span>High</span>
               </div>
             </div>
           </div>
           
-          <div v-if="user.role === 'AUTHORITY'" class="reporter-info">
-            <h4>Reporter Information</h4>
-            <div class="info-item">
-              <user-icon size="16" />
-              <span>{{ selectedReport.reporter.name }}</span>
+          <!-- Legend -->
+          <div class="legend-card">
+            <h4>Legend</h4>
+            <div class="legend-items">
+              <div 
+                v-for="type in emergencyTypes" 
+                :key="type.value" 
+                class="legend-item"
+              >
+                <span 
+                  class="legend-dot" 
+                  :style="{ backgroundColor: type.color }"
+                ></span>
+                <span>{{ type.label }}</span>
+              </div>
             </div>
-            <div class="info-item">
-              <mail-icon size="16" />
-              <span>{{ selectedReport.reporter.email }}</span>
-            </div>
-            <div class="info-item">
-              <phone-icon size="16" />
-              <span>{{ selectedReport.reporter.phone }}</span>
+            
+            <div class="severity-legend">
+              <h5>Circle Size</h5>
+              <div class="severity-dots">
+                <span class="severity-dot small"></span>
+                <span class="severity-dot medium"></span>
+                <span class="severity-dot large"></span>
+                <span class="severity-label">Severity Level</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, onMounted, computed, inject, watch } from 'vue';
-  import { 
-    FilterIcon, ChevronDownIcon, RefreshCwIcon, CheckIcon, 
-    MapIcon, FlameIcon, LoaderIcon, XIcon, AlertTriangleIcon,
-    MapPinIcon, ClockIcon, ThermometerIcon, UserIcon,
-    MailIcon, PhoneIcon
-  } from 'lucide-vue-next';
-  import { getCrimeReports } from '../services/reportService';
-  import { getCurrentLocation } from '../services/locationService';
-  
-  // Get current user from parent component
-  const currentUser = inject('currentUser');
-  const user = computed(() => currentUser.value);
-  
-  // Map state
-  const mapElement = ref(null);
-  const isLoading = ref(true);
-  const mapView = ref('all');
-  const showFilters = ref(false);
-  const selectedReport = ref(null);
-  
-  // Filter options
-  const crimeTypes = [
-    { value: 'theft', label: 'Theft' },
-    { value: 'assault', label: 'Assault' },
-    { value: 'vandalism', label: 'Vandalism' },
-    { value: 'burglary', label: 'Burglary' },
-    { value: 'suspicious_activity', label: 'Suspicious Activity' },
-    { value: 'drug_related', label: 'Drug-Related Activity' },
-    { value: 'harassment', label: 'Harassment' },
-    { value: 'traffic_incident', label: 'Traffic Incident' },
-    { value: 'other', label: 'Other' }
-  ];
-  
-  const timePeriods = [
-    { value: 'today', label: 'Today' },
-    { value: 'week', label: 'Past Week' },
-    { value: 'month', label: 'Past Month' },
-    { value: 'year', label: 'Past Year' },
-    { value: 'all', label: 'All Time' }
-  ];
-  
-  const severityLevels = [
-    { value: 'low', label: 'Low' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'high', label: 'High' }
-  ];
-  
-  // Filter state
-  const filters = ref({
-    crimeTypes: crimeTypes.map(type => type.value),
-    timePeriod: 'month',
-    severityLevels: severityLevels.map(level => level.value)
-  });
-  
-  // Reports data
-  const allReports = ref([]);
-  const filteredReports = ref([]);
-  const hotspots = ref([]);
-  
-  // Methods
-  const resetFilters = () => {
-    filters.value = {
-      crimeTypes: crimeTypes.map(type => type.value),
-      timePeriod: 'month',
-      severityLevels: severityLevels.map(level => level.value)
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      isLoading: true,
+      errorMessage: null,
+      map: null,
+      mapView: 'dots', // 'dots' or 'heatmap'
+      minSeverity: 0,
+      activeFilters: ['fire', 'medical', 'crime', 'natural disaster', 'other'],
+      emergencyTypes: [
+        { value: 'fire', label: 'Fire', color: '#ef4444' },
+        { value: 'medical', label: 'Medical', color: '#3b82f6' },
+        { value: 'crime', label: 'Crime', color: '#6366f1' },
+        { value: 'natural disaster', label: 'Natural disaster', color: '#65a30d' },
+        { value: 'other', label: 'Other', color: '#9333ea' },
+      ],
+      emergencyReports: [],
+      circles: [],
+      heatmap: null,
     };
-  };
-  
-  const applyFilters = () => {
-    showFilters.value = false;
-    filterReports();
-  };
-  
-  const filterReports = () => {
-    // Apply filters to reports
-    filteredReports.value = allReports.value.filter(report => {
-      // Filter by crime type
-      if (!filters.value.crimeTypes.includes(report.crimeType)) {
-        return false;
-      }
-      
-      // Filter by severity
-      if (!filters.value.severityLevels.includes(report.severityLevel)) {
-        return false;
-      }
-      
-      // Filter by time period
-      const reportDate = new Date(report.timestamp);
-      const now = new Date();
-      
-      switch (filters.value.timePeriod) {
-        case 'today':
-          return reportDate.toDateString() === now.toDateString();
-        case 'week':
-          const weekAgo = new Date();
-          weekAgo.setDate(now.getDate() - 7);
-          return reportDate >= weekAgo;
-        case 'month':
-          const monthAgo = new Date();
-          monthAgo.setMonth(now.getMonth() - 1);
-          return reportDate >= monthAgo;
-        case 'year':
-          const yearAgo = new Date();
-          yearAgo.setFullYear(now.getFullYear() - 1);
-          return reportDate >= yearAgo;
-        default:
-          return true;
-      }
-    });
-    
-    // Update map
-    updateMap();
-  };
-  
-  const getCrimeTypeLabel = (value) => {
-    const crimeType = crimeTypes.find(type => type.value === value);
-    return crimeType ? crimeType.label : value;
-  };
-  
-  const getSeverityLabel = (value) => {
-    const severity = severityLevels.find(level => level.value === value);
-    return severity ? severity.label : value;
-  };
-  
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
-  
-  const calculateHotspots = () => {
-    // Group reports by location (simplified for demo)
-    const locationGroups = {};
-    
-    filteredReports.value.forEach(report => {
-      const locationKey = `${report.location.latitude.toFixed(3)},${report.location.longitude.toFixed(3)}`;
-      
-      if (!locationGroups[locationKey]) {
-        locationGroups[locationKey] = {
-          latitude: report.location.latitude,
-          longitude: report.location.longitude,
-          count: 0,
-          reports: []
-        };
-      }
-      
-      locationGroups[locationKey].count++;
-      locationGroups[locationKey].reports.push(report);
-    });
-    
-    // Convert to array and add color based on count
-    hotspots.value = Object.values(locationGroups).map(spot => {
-      let color;
-      if (spot.count >= 10) {
-        color = '#f44336'; // Red for 10+
-      } else if (spot.count >= 5) {
-        color = '#ff9800'; // Orange for 5-10
-      } else {
-        color = '#ffeb3b'; // Yellow for 1-5
-      }
-      
-      return {
-        ...spot,
-        color
-      };
-    });
-  };
-  
-  const initMap = async () => {
-    if (!mapElement.value) return;
-    
-    try {
-      isLoading.value = true;
-      
-      // Get user's current location
-      const userLocation = await getCurrentLocation();
-      
-      // Fetch crime reports
-      const reports = await getCrimeReports();
-      allReports.value = reports;
-      
-      // Apply initial filters
-      filterReports();
-      
-      // Initialize Google Maps (simulated)
-      console.log('Map would be initialized here with user location:', 
-        userLocation.latitude, 
-        userLocation.longitude
+  },
+  computed: {
+    filteredReports() {
+      return this.emergencyReports.filter(report => 
+        this.activeFilters.includes(report.type) && 
+        report.severity >= this.minSeverity
       );
-      
-      // Simulate map with a colored div
-      const mapDiv = document.createElement('div');
-      mapDiv.style.width = '100%';
-      mapDiv.style.height = '100%';
-      mapDiv.style.backgroundColor = '#e0e0e0';
-      mapDiv.style.display = 'flex';
-      mapDiv.style.alignItems = 'center';
-      mapDiv.style.justifyContent = 'center';
-      mapDiv.style.color = '#666';
-      mapDiv.style.fontWeight = 'bold';
-      mapDiv.textContent = 'Google Maps would display here with crime data';
-      
-      mapElement.value.innerHTML = '';
-      mapElement.value.appendChild(mapDiv);
-      
-      isLoading.value = false;
-    } catch (error) {
-      console.error('Error initializing map:', error);
-      isLoading.value = false;
+    },
+    heatmapData() {
+      if (!window.google) return [];
+      return this.filteredReports.map(report => ({
+        location: new google.maps.LatLng(report.location.lat, report.location.lng),
+        weight: report.severity,
+      }));
     }
-  };
-  
-  const updateMap = () => {
-    // Calculate hotspots
-    calculateHotspots();
-    
-    // Update map markers (simulated)
-    console.log('Map would be updated with:', 
-      mapView.value === 'all' ? filteredReports.value : hotspots.value
-    );
-  };
-  
-  const openPhotoViewer = (index) => {
-    // Implement photo viewer functionality
-    console.log('Opening photo viewer for index:', index);
-  };
-  
-  // Watch for changes in map view
-  watch(() => mapView.value, () => {
-    updateMap();
-  });
-  
-  onMounted(() => {
-    initMap();
-  });
-  </script>
-  
-  <style scoped>
-  .crime-map-container {
-    height: calc(100vh - 104px);
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .page-header {
-    margin-bottom: 16px;
-  }
-  
-  .page-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 8px;
-  }
-  
-  .page-header p {
-    color: #666;
-    font-size: 16px;
-  }
-  
-  .map-controls {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  
-  .filter-controls {
-    position: relative;
-  }
-  
-  .filter-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .filter-toggle:hover {
-    background-color: #f5f5f5;
-  }
-  
-  .filter-toggle .rotate {
-    transform: rotate(180deg);
-  }
-  
-  .filters-panel {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 8px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    z-index: 10;
-    padding: 16px;
-  }
-  
-  .filter-group {
-    margin-bottom: 16px;
-  }
-  
-  .filter-group label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: #333;
-  }
-  
-  .checkbox-group, .radio-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  
-  .checkbox, .radio {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-  }
-  
-  .filter-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 16px;
-  }
-  
-  .reset-btn, .apply-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-  }
-  
-  .reset-btn {
-    background-color: #f0f0f0;
-    color: #555;
-  }
-  
-  .reset-btn:hover {
-    background-color: #e0e0e0;
-  }
-  
-  .apply-btn {
-    background-color: var(--primary-color);
-    color: white;
-  }
-  
-  .apply-btn:hover {
-    background-color: #2a75e8;
-  }
-  
-  .view-controls {
-    display: flex;
-    gap: 8px;
-  }
-  
-  .view-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .view-btn:hover {
-    background-color: #f5f5f5;
-  }
-  
-  .view-btn.active {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-  }
-  
-  .map-container {
-    flex: 1;
-    position: relative;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-  }
-  
-  .map-element {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .map-legend {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 12px;
-    z-index: 5;
-  }
-  
-  .map-legend h4 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #333;
-  }
-  
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-    font-size: 12px;
-  }
-  
-  .legend-color {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-  }
-  
-  .map-loading {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-  }
-  
-  .spin {
-    animation: spin 1s linear infinite;
-  }
-  
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
+  },
+  watch: {
+    filteredReports() {
+      this.updateMapVisualization();
+    },
+    mapView() {
+      this.updateMapVisualization();
     }
-    to {
-      transform: rotate(360deg);
+  },
+  mounted() {
+    this.loadGoogleMap();
+    this.loadEmergencyData();
+  },
+  methods: {
+    loadGoogleMap() {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD8aepW-FrtXxQB64FKXS2JKp9QabST0dY&libraries=visualization`;
+      script.async = true;
+      script.defer = true;
+      script.onload = this.initMap;
+      script.onerror = () => {
+        this.errorMessage = 'Failed to load Google Maps';
+        this.isLoading = false;
+      };
+      document.head.appendChild(script);
+    },
+    initMap() {
+      this.isLoading = false;
+      const mapElement = this.$refs.mapElement;
+      this.map = new google.maps.Map(mapElement, {
+        center: { lat: 18.1096, lng: -77.2975 },
+        zoom: 12,
+        fullscreenControl: false,
+        streetViewControl: false,
+        mapTypeControl: false,
+      });
+      
+      // Initialize visualization after map is loaded
+      if (this.emergencyReports.length > 0) {
+        this.updateMapVisualization();
+      }
+    },
+    loadEmergencyData() {
+    // Mock data - in a real app, this would be fetched from an API
+    this.emergencyReports = [
+      {
+        id: '1',
+        type: 'fire',
+        location: { lat: 18.1096, lng: -77.2975 },
+        timestamp: new Date('2023-05-15T10:30:00'),
+        severity: 8,
+        description: 'Building fire on a main street',
+        reportedBy: 'user123',
+      },
+      {
+        id: '2',
+        type: 'medical',
+        location: { lat: 18.1157, lng: -77.2963 },
+        timestamp: new Date('2023-05-15T11:15:00'),
+        severity: 6,
+        description: 'Person collapsed near a market',
+        reportedBy: 'user456',
+      },
+      {
+        id: '3',
+        type: 'police',
+        location: { lat: 18.0969, lng: -77.3833 },
+        timestamp: new Date('2023-05-15T09:45:00'),
+        severity: 5,
+        description: 'Suspicious activity reported',
+        reportedBy: 'user789',
+      },
+      {
+        id: '4',
+        type: 'natural',
+        location: { lat: 18.0717, lng: -77.2878 },
+        timestamp: new Date('2023-05-15T08:30:00'),
+        severity: 7,
+        description: 'Fallen tree blocking road',
+        reportedBy: 'user101',
+      },
+      {
+        id: '5',
+        type: 'fire',
+        location: { lat: 18.1096, lng: -77.2945 },
+        timestamp: new Date('2023-05-15T12:00:00'),
+        severity: 9,
+        description: 'Large fire in industrial area',
+        reportedBy: 'user202',
+      },
+      {
+        id: '6',
+        type: 'medical',
+        location: { lat: 18.0812, lng: -77.2893 },
+        timestamp: new Date('2023-05-15T13:20:00'),
+        severity: 7,
+        description: 'Multiple people injured in accident',
+        reportedBy: 'user303',
+      },
+      {
+        id: '7',
+        type: 'police',
+        location: { lat: 18.0134, lng: -77.7884 },
+        timestamp: new Date('2023-05-15T14:10:00'),
+        severity: 4,
+        description: 'Reported theft',
+        reportedBy: 'user404',
+      },
+      {
+        id: '8',
+        type: 'other',
+        location: { lat: 18.1096, lng: -77.2987 },
+        timestamp: new Date('2023-05-15T15:30:00'),
+        severity: 3,
+        description: 'Power outage affecting several blocks',
+        reportedBy: 'user505',
+      },
+      {
+        id: '9',
+        type: 'natural',
+        location: { lat: 18.1295, lng: -77.2879 },
+        timestamp: new Date('2023-05-15T16:45:00'),
+        severity: 6,
+        description: 'Flooding reported in low-lying area',
+        reportedBy: 'user606',
+      },
+      {
+        id: '10',
+        type: 'fire',
+        location: { lat: 18.0855, lng: -77.3094 },
+        timestamp: new Date('2023-05-15T17:30:00'),
+        severity: 7,
+        description: 'Vehicle fire on highway',
+        reportedBy: 'user707',
+      },
+      {
+      id: '11',
+      type: 'fire',
+      location: { lat: 18.2320, lng: -77.4763 },
+      timestamp: new Date('2023-05-15T18:00:00'),
+      severity: 8,
+      description: 'Forest fire near Cockpit Country',
+      reportedBy: 'user808',
+    },
+    {
+      id: '12',
+      type: 'medical',
+      location: { lat: 17.8835, lng: -76.6830 },
+      timestamp: new Date('2023-05-15T18:45:00'),
+      severity: 6,
+      description: 'Child injured in rural area',
+      reportedBy: 'user909',
+    },
+    {
+      id: '13',
+      type: 'police',
+      location: { lat: 18.2092, lng: -77.3158 },
+      timestamp: new Date('2023-05-15T19:30:00'),
+      severity: 5,
+      description: 'Burglary at a remote property',
+      reportedBy: 'user1010',
+    },
+    {
+      id: '14',
+      type: 'natural',
+      location: { lat: 17.9891, lng: -77.2974 },
+      timestamp: new Date('2023-05-15T20:15:00'),
+      severity: 7,
+      description: 'Earthquake tremors felt in Kingston',
+      reportedBy: 'user1111',
+    },
+    {
+      id: '15',
+      type: 'fire',
+      location: { lat: 18.0617, lng: -77.2359 },
+      timestamp: new Date('2023-05-15T21:00:00'),
+      severity: 9,
+      description: 'Massive fire in a sugar cane field',
+      reportedBy: 'user1212',
+    },
+    ];
+  },
+
+    setMapView(view) {
+      this.mapView = view;
+    },
+    updateMapVisualization() {
+      if (!this.map || !window.google) return;
+      
+      // Clear existing visualizations
+      this.clearVisualization();
+      
+      if (this.mapView === 'dots') {
+        this.renderDots();
+      } else {
+        this.renderHeatmap();
+      }
+    },
+    renderDots() {
+      this.circles = this.filteredReports.map(report => {
+        const typeInfo = this.emergencyTypes.find(t => t.value === report.type);
+        const color = typeInfo ? typeInfo.color : '#9333ea';
+        
+        // Create a darker shade for the stroke
+        const strokeColor = this.darkenColor(color, 20);
+        
+        return new google.maps.Circle({
+          map: this.map,
+          center: report.location,
+          radius: report.severity * 100,
+          fillColor: color,
+          fillOpacity: 0.7,
+          strokeColor: strokeColor,
+          strokeOpacity: 1,
+          strokeWeight: 1,
+        });
+      });
+    },
+    renderHeatmap() {
+      if (this.heatmapData.length === 0) return;
+      
+      this.heatmap = new google.maps.visualization.HeatmapLayer({
+        data: this.heatmapData,
+        map: this.map,
+        radius: 20,
+        opacity: 0.7,
+      });
+    },
+    clearVisualization() {
+      // Clear circles
+      if (this.circles.length) {
+        this.circles.forEach(circle => circle.setMap(null));
+        this.circles = [];
+      }
+      
+      // Clear heatmap
+      if (this.heatmap) {
+        this.heatmap.setMap(null);
+        this.heatmap = null;
+      }
+    },
+    darkenColor(hex, percent) {
+      // Convert hex to RGB
+      let r = parseInt(hex.substring(1, 3), 16);
+      let g = parseInt(hex.substring(3, 5), 16);
+      let b = parseInt(hex.substring(5, 7), 16);
+      
+      // Darken
+      r = Math.floor(r * (100 - percent) / 100);
+      g = Math.floor(g * (100 - percent) / 100);
+      b = Math.floor(b * (100 - percent) / 100);
+      
+      // Convert back to hex
+      return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
+  },
+  beforeDestroy() {
+    this.clearVisualization();
   }
-  
-  .report-details {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    width: 350px;
-    max-height: calc(100% - 32px);
-    overflow-y: auto;
-    z-index: 5;
+};
+</script>
+
+<style scoped>
+.map-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f3f4f6;
+}
+
+.map-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 80%;
+  max-width: 800px;
+}
+
+.map-container {
+  height: 700px;
+  position: relative;
+}
+
+.map-element {
+  width: 100%;
+  height: 100%;
+}
+
+.map-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.loading-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  color: #374151;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e5e7eb;
+  border-radius: 50%;
+  border-top-color: #3b82f6;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  
-  .report-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .report-header h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333;
-  }
-  
-  .close-btn {
-    background: none;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-  }
-  
-  .close-btn:hover {
-    background-color: #f0f0f0;
-  }
-  
-  .report-content {
-    padding: 16px;
-  }
-  
-  .report-info {
-    margin-bottom: 16px;
-  }
-  
-  .info-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    color: #555;
-  }
-  
-  .report-description h4, .report-photos h4, .reporter-info h4 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #333;
-  }
-  
-  .report-description {
-    margin-bottom: 16px;
-  }
-  
-  .report-description p {
-    color: #555;
-    line-height: 1.5;
-  }
-  
-  .report-photos {
-    margin-bottom: 16px;
-  }
-  
-  .photos-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-  
-  .photo-item {
-    aspect-ratio: 1;
-    border-radius: 4px;
-    overflow: hidden;
-    cursor: pointer;
-  }
-  
-  .photo-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .reporter-info {
-    padding-top: 16px;
-    border-top: 1px solid #eee;
-  }
-  
-  /* Transitions */
-  .slide-down-enter-active,
-  .slide-down-leave-active {
-    transition: all 0.3s ease;
-  }
-  
-  .slide-down-enter-from,
-  .slide-down-leave-to {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  </style>
+}
+
+.error-message {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 10px;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  z-index: 3;
+}
+
+/* Map Controls */
+.map-controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 250px;
+}
+
+.control-card, .legend-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  width: 100%;
+}
+
+.control-header {
+  margin-bottom: 12px;
+}
+
+.control-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.view-toggle button {
+  flex: 1;
+  padding: 6px 12px;
+  background-color: #f9fafb;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.view-toggle button.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.filter-section {
+  margin-bottom: 16px;
+}
+
+.filter-section h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+}
+
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-option label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.severity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.severity-slider {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Legend */
+.legend-card h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.severity-legend h5 {
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0 0 6px 0;
+}
+
+.severity-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.severity-dot {
+  background-color: #6b7280;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.severity-dot.small {
+  width: 6px;
+  height: 6px;
+}
+
+.severity-dot.medium {
+  width: 10px;
+  height: 10px;
+}
+
+.severity-dot.large {
+  width: 14px;
+  height: 14px;
+}
+
+.severity-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-left: 4px;
+}
+</style>
