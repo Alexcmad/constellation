@@ -346,7 +346,7 @@
             <plus-icon size="16" />
             New Report
           </button>
-          <router-link to="/map" class="view-map-btn" aria-label="View reports on map">
+          <router-link to="/auth/map" class="view-map-btn" aria-label="View reports on map">
             <map-icon size="16" />
             View on Map
           </router-link>

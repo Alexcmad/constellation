@@ -64,7 +64,7 @@
         <div class="recent-reports">
           <div class="section-header">
             <h2>Recent Reports</h2>
-            <router-link to="auth/nearby" class="view-all">
+            <router-link to="/auth/map" class="view-all">
               View All <ChevronRightIcon size="16" />
             </router-link>
           </div>
@@ -76,7 +76,9 @@
               </div>
               <div class="report-details">
                 <div class="report-location">
+                  
                   <MapPinIcon size="14" />
+                  
                   <span>{{ getLocationName(report.location_id) }}</span>
                 </div>
                 <div class="report-time">
@@ -86,7 +88,9 @@
               </div>
               <div class="report-actions">
                 <button class="action-btn">
+                  <router-link to="/auth/map" class="view-all">
                   <EyeIcon size="14" />
+                </router-link>
                   <span>View</span>
                 </button>
               </div>

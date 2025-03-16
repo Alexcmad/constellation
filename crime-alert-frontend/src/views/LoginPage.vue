@@ -4,7 +4,7 @@
       <div class="login-header">
         <div class="logo">
           <shield-alert-icon size="32" class="logo-icon" />
-          <h1>CrimeAlert</h1>
+          <h1>Danger Zone</h1>
         </div>
         <p>Community Safety Reporting System</p>
       </div>

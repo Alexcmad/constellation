@@ -441,6 +441,7 @@
   .alerts-filters {
     padding: 16px;
     border-bottom: 1px solid #eee;
+    color: black;
   }
   
   .search-box {
